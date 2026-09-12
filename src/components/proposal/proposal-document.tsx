@@ -37,7 +37,7 @@ export function ProposalDocument({ data }: { data: ProposalViewData }) {
 
       <header className="relative z-10 flex min-h-[135px] items-start justify-between bg-charcoal px-[38px] py-8 text-white">
         <div className="flex items-center gap-3">
-          <img src="logo.webp" alt="PRO-TUNING" className="h-[52px] max-w-[245px] rounded bg-white object-contain p-1.5" />
+          <img src="logo.webp" alt="PRO-TUNING" className="h-[52px] max-w-[245px] object-contain" />
         </div>
         <div className="text-right text-[13px] leading-relaxed text-zinc-300">
           <div className="text-sm font-black tracking-[0.16em] text-white">ПЕРСОНАЛЬНОЕ ПРЕДЛОЖЕНИЕ</div>

@@ -144,6 +144,13 @@
   margin: 0;
 }
 
+/* Сохранять тёмный фон и акценты в «Сохранить как PDF» (print-color-adjust наследуется). */
+.proposal-doc,
+.proposal-doc * {
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
 @media print {
   html,
   body {
