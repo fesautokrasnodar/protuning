@@ -88,7 +88,11 @@ export function ProposalViewPage() {
       <PageHeader
         kicker="Просмотр"
         title={p.number}
-        description={p.clientName ? `${p.clientName} · ${p.clientContact || 'контакт не указан'}` : undefined}
+        description={
+          p.clientName || p.clientPhone || p.clientEmail
+            ? [p.clientName, p.clientPhone, p.clientEmail].filter(Boolean).join(' · ')
+            : undefined
+        }
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="ghost" className="text-muted-foreground" onClick={() => navigate('/proposals')}>

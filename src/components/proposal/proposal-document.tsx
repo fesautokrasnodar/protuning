@@ -12,7 +12,8 @@ export interface ProposalViewData {
   carLabel: string
   carPhotoUrl: string | null
   clientName: string
-  clientContact: string
+  clientPhone: string
+  clientEmail: string
   items: ProposalItemView[]
   subtotal: number
   discount: number
@@ -36,7 +37,7 @@ export function ProposalDocument({ data }: { data: ProposalViewData }) {
 
       <header className="relative z-10 flex min-h-[135px] items-start justify-between bg-charcoal px-[38px] py-8 text-white">
         <div className="flex items-center gap-3">
-          <img src="logo.png" alt="PRO-TUNING" className="h-[52px] max-w-[245px] rounded bg-white object-contain p-1.5" />
+          <img src="logo.webp" alt="PRO-TUNING" className="h-[52px] max-w-[245px] rounded bg-white object-contain p-1.5" />
         </div>
         <div className="text-right text-[13px] leading-relaxed text-zinc-300">
           <div className="text-sm font-black tracking-[0.16em] text-white">ПЕРСОНАЛЬНОЕ ПРЕДЛОЖЕНИЕ</div>
@@ -79,7 +80,16 @@ export function ProposalDocument({ data }: { data: ProposalViewData }) {
           </div>
           <div className="min-h-[62px] border-t-[3px] border-ink bg-[#f5f5f6] px-3 py-2.5">
             <div className="mb-1 text-[10px] font-black uppercase tracking-wide text-sub">Контакт</div>
-            <div className="text-[13px] font-bold break-words text-ink">{data.clientContact || '—'}</div>
+            <div className="text-[13px] font-bold break-words text-ink">
+              {data.clientPhone || data.clientEmail ? (
+                <>
+                  {data.clientPhone ? <div>{data.clientPhone}</div> : null}
+                  {data.clientEmail ? <div>{data.clientEmail}</div> : null}
+                </>
+              ) : (
+                '—'
+              )}
+            </div>
           </div>
         </div>
 
@@ -105,11 +115,11 @@ export function ProposalDocument({ data }: { data: ProposalViewData }) {
           </div>
         )}
 
-        <div className="relative mt-4 grid grid-cols-[1fr_auto] items-center overflow-hidden bg-charcoal py-4 text-white">
-          <div className="pointer-events-none absolute inset-y-[-15px] left-[10px] h-20 w-3 rotate-[30deg] bg-red" />
-          <div className="pointer-events-none absolute inset-y-[-15px] right-[10px] h-20 w-3 rotate-[30deg] bg-red" />
-          <span className="pl-4 text-[16px] font-black">ИТОГО</span>
-          <strong className="pr-4 text-[27px] font-black">{formatRub(data.total)}</strong>
+        <div className="relative mt-4 flex items-center justify-between overflow-hidden bg-charcoal py-4 pl-9 pr-9 text-white print-clean">
+          <span className="pointer-events-none absolute top-1/2 left-2 h-12 w-1.5 -translate-y-1/2 rotate-[24deg] bg-red" />
+          <span className="pointer-events-none absolute top-1/2 right-2 h-12 w-1.5 -translate-y-1/2 rotate-[24deg] bg-red" />
+          <span className="text-[16px] font-black">ИТОГО</span>
+          <strong className="text-[27px] font-black">{formatRub(data.total)}</strong>
         </div>
 
         <div className="mt-3.5 grid grid-cols-3 gap-2">

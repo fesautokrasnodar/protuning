@@ -5,5 +5,5 @@ interface LogoProps {
 }
 
 export function Logo({ className }: LogoProps) {
-  return <img src="logo.png" alt="PRO-TUNING" className={cn('h-10 w-auto object-contain', className)} draggable={false} />
+  return <img src="logo.webp" alt="PRO-TUNING" className={cn('h-10 w-auto object-contain', className)} draggable={false} />
 }

@@ -65,7 +65,8 @@ export interface Proposal {
   number: string
   carId: string
   clientName: string
-  clientContact: string
+  clientPhone: string
+  clientEmail: string
   status: ProposalStatus
   subtotal: number
   discount: number

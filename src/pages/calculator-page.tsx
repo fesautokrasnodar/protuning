@@ -20,6 +20,8 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { availableServicesForCar, computeTotals, priceForCar } from '@/lib/calc'
 import { parsePrice } from '@/lib/money'
+import { formatPhoneMask } from '@/lib/phone'
+import { proposalInputSchema } from '@/lib/validation/schemas'
 
 export function CalculatorPage() {
   const { session } = useAuth()
@@ -31,7 +33,9 @@ export function CalculatorPage() {
 
   const [carId, setCarId] = useState('')
   const [clientName, setClientName] = useState('')
-  const [clientContact, setClientContact] = useState('')
+  const [clientPhone, setClientPhone] = useState('')
+  const [clientEmail, setClientEmail] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<'clientName' | 'clientPhone' | 'clientEmail', string>>>({})
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [discountInput, setDiscountInput] = useState('')
   const [saving, setSaving] = useState(false)
@@ -65,7 +69,8 @@ export function CalculatorPage() {
     carLabel: currentCar ? `${currentCar.brand} ${currentCar.model}` : 'Выберите автомобиль',
     carPhotoUrl: currentCar?.photoUrl ?? null,
     clientName,
-    clientContact,
+    clientPhone,
+    clientEmail,
     items: validSelected.map((o, i) => ({ num: i + 1, name: o.name, price: o.price })),
     subtotal: totals.subtotal,
     discount: totals.discount,
@@ -93,18 +98,33 @@ export function CalculatorPage() {
       toast.error('Выберите хотя бы одну услугу')
       return
     }
-    if (!clientName.trim()) {
-      toast.error('Укажите клиента')
+    if (!session) return
+    const parsed = proposalInputSchema.safeParse({
+      carId,
+      clientName,
+      clientPhone,
+      clientEmail,
+      status: 'draft',
+      discount: totals.discount,
+      serviceIds: validSelected.map((o) => o.id),
+    })
+    if (!parsed.success) {
+      const errors: Record<string, string> = {}
+      for (const issue of parsed.error.issues) {
+        const key = String(issue.path[0] ?? '')
+        if (key && !errors[key]) errors[key] = issue.message
+      }
+      setFieldErrors(errors)
       return
     }
-    if (!session) return
     setSaving(true)
     try {
       const created = await createProposal.mutateAsync({
         carId,
-        clientName: clientName.trim(),
-        clientContact: clientContact.trim(),
-        status: 'draft',
+        clientName: parsed.data.clientName,
+        clientPhone: parsed.data.clientPhone,
+        clientEmail: parsed.data.clientEmail,
+        status: parsed.data.status,
         discount: totals.discount,
         createdBy: session.userId,
         selection: validSelected.map((o) => ({ serviceId: o.id, serviceName: o.name, price: o.price })),
@@ -144,24 +164,61 @@ export function CalculatorPage() {
           <Card className="p-5">
             <CarPicker cars={cars} value={carId} onChange={(id) => setCarId(id)} />
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="clientName">Клиент / компания</Label>
-                <Input
-                  id="clientName"
-                  placeholder="Например: Алексей / ООО Компания"
-                  value={clientName}
-                  onChange={(e) => setClientName(e.target.value)}
-                />
+            <div className="mt-4 space-y-3">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="clientName">
+                    Клиент / компания <span className="font-normal text-muted-foreground">(необязательно)</span>
+                  </Label>
+                  <Input
+                    id="clientName"
+                    placeholder="Например: Алексей / ООО Компания"
+                    value={clientName}
+                    onChange={(e) => setClientName(e.target.value)}
+                    aria-invalid={Boolean(fieldErrors.clientName)}
+                  />
+                  {fieldErrors.clientName ? (
+                    <p className="text-xs font-semibold text-red">{fieldErrors.clientName}</p>
+                  ) : null}
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="clientPhone">
+                    Телефон <span className="font-normal text-muted-foreground">(необязательно)</span>
+                  </Label>
+                  <Input
+                    id="clientPhone"
+                    inputMode="tel"
+                    placeholder="+7 (___) ___-__-__"
+                    value={clientPhone}
+                    onChange={(e) => {
+                      setClientPhone(formatPhoneMask(e.target.value))
+                      setFieldErrors((p) => ({ ...p, clientPhone: undefined }))
+                    }}
+                    aria-invalid={Boolean(fieldErrors.clientPhone)}
+                  />
+                  {fieldErrors.clientPhone ? (
+                    <p className="text-xs font-semibold text-red">{fieldErrors.clientPhone}</p>
+                  ) : null}
+                </div>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="clientContact">Контакт</Label>
+                <Label htmlFor="clientEmail">
+                  E-mail <span className="font-normal text-muted-foreground">(необязательно)</span>
+                </Label>
                 <Input
-                  id="clientContact"
-                  placeholder="+7 … / email"
-                  value={clientContact}
-                  onChange={(e) => setClientContact(e.target.value)}
+                  id="clientEmail"
+                  type="email"
+                  placeholder="client@company.ru"
+                  value={clientEmail}
+                  onChange={(e) => {
+                    setClientEmail(e.target.value)
+                    setFieldErrors((p) => ({ ...p, clientEmail: undefined }))
+                  }}
+                  aria-invalid={Boolean(fieldErrors.clientEmail)}
                 />
+                {fieldErrors.clientEmail ? (
+                  <p className="text-xs font-semibold text-red">{fieldErrors.clientEmail}</p>
+                ) : null}
               </div>
             </div>
 

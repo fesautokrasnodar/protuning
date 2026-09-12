@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { PROPOSAL_STATUSES, ROLES } from '@/types'
+import { phoneDigits } from '@/lib/phone'
 
 const uuid = z.string().trim().min(1).max(64)
 
@@ -44,12 +45,30 @@ export const loginSchema = z.object({
 })
 export type LoginInput = z.infer<typeof loginSchema>
 
+/* ---------- Контакты клиента (необязательные, но валидные) ---------- */
+
+/** Телефон: пусто допустимо, иначе полный номер из 10 цифр. */
+export const phoneInputSchema = z
+  .string()
+  .trim()
+  .transform(phoneDigits)
+  .refine((d) => d === '' || d.length === 10, 'Введите номер полностью (10 цифр)')
+  .transform((d) => (d === '' ? '' : `+7${d}`))
+
+/** E-mail: пусто допустимо, иначе корректный e-mail. */
+export const emailInputSchema = z
+  .string()
+  .trim()
+  .transform((v) => v.replace(/\s+/g, ''))
+  .refine((v) => v === '' || z.email().safeParse(v).success, 'Некорректный e-mail')
+
 /* ---------- КП ---------- */
 
 export const proposalInputSchema = z.object({
   carId: uuid,
-  clientName: z.string().trim().min(1, 'Укажите клиента').max(200),
-  clientContact: z.string().trim().max(200).optional().default(''),
+  clientName: z.string().trim().max(200).default(''),
+  clientPhone: phoneInputSchema.default(''),
+  clientEmail: emailInputSchema.default(''),
   status: z.enum(PROPOSAL_STATUSES).default('draft'),
   discount: z.number().int().min(0, 'Скидка не может быть отрицательной').max(100_000_000),
   serviceIds: z.array(uuid).min(1, 'Выберите хотя бы одну услугу'),

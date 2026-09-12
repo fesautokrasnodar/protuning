@@ -210,8 +210,10 @@ export function ProposalsPage() {
                       <TableCell>{label}</TableCell>
                       <TableCell>
                         <div className="font-semibold">{proposal.clientName || '—'}</div>
-                        {proposal.clientContact ? (
-                          <div className="text-xs text-muted-foreground">{proposal.clientContact}</div>
+                        {proposal.clientPhone || proposal.clientEmail ? (
+                          <div className="text-xs text-muted-foreground">
+                            {proposal.clientPhone || proposal.clientEmail}
+                          </div>
                         ) : null}
                       </TableCell>
                       <TableCell className="text-muted-foreground">{formatProposalDate(proposal.createdAt)}</TableCell>

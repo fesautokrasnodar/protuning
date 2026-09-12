@@ -72,7 +72,8 @@ describe('proposalInputSchema', () => {
   const base = {
     carId: 'car_voyah_dream',
     clientName: 'Алексей',
-    clientContact: '',
+    clientPhone: '',
+    clientEmail: '',
     status: 'draft' as const,
     discount: 0,
   }
@@ -87,6 +88,31 @@ describe('proposalInputSchema', () => {
   it('принимает не-uuid идентификаторы (mock-режим)', () => {
     const ok = proposalInputSchema.safeParse({ ...base, serviceIds: ['srv_noise_doors'] })
     expect(ok.success).toBe(true)
+  })
+
+  it('контакты клиента необязательны, но валидируются', () => {
+    const withoutContacts = proposalInputSchema.safeParse({
+      ...base,
+      clientName: '',
+      clientPhone: '',
+      clientEmail: '',
+      serviceIds: ['x'],
+    })
+    expect(withoutContacts.success).toBe(true)
+
+    const goodPhone = proposalInputSchema.safeParse({
+      ...base,
+      clientPhone: '+7 (900) 000-00-00',
+      serviceIds: ['x'],
+    })
+    expect(goodPhone.success).toBe(true)
+    if (goodPhone.success) expect(goodPhone.data.clientPhone).toBe('+79000000000')
+
+    const badPhone = proposalInputSchema.safeParse({ ...base, clientPhone: '+7 900', serviceIds: ['x'] })
+    expect(badPhone.success).toBe(false)
+
+    const badEmail = proposalInputSchema.safeParse({ ...base, clientEmail: 'not-an-email', serviceIds: ['x'] })
+    expect(badEmail.success).toBe(false)
   })
 
   it('отклоняет отрицательную скидку', () => {

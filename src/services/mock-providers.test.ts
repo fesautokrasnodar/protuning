@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+﻿import { beforeEach, describe, expect, it } from 'vitest'
 import { mockCarsProvider } from '@/services/mock-cars'
 import { mockProposalsProvider } from '@/services/mock-proposals'
 import { loadDb, type DbShape } from '@/lib/mock/db'
@@ -49,7 +49,8 @@ describe('cars (mock over localStorage)', () => {
     await mockProposalsProvider.create({
       carId: target.id,
       clientName: 'Клиент',
-      clientContact: '',
+      clientPhone: '',
+      clientEmail: '',
       status: 'draft',
       discount: 0,
       createdBy: 'user_admin',
@@ -70,7 +71,8 @@ describe('proposals (mock over localStorage)', () => {
     const proposal = await mockProposalsProvider.create({
       carId: cars[0]!.id,
       clientName: 'Алексей',
-      clientContact: '+7 900 000-00-00',
+      clientPhone: '+79000000000',
+      clientEmail: 'client@mail.ru',
       status: 'draft',
       discount: 5000,
       createdBy: 'user_admin',
@@ -94,7 +96,8 @@ describe('proposals (mock over localStorage)', () => {
     const a = await mockProposalsProvider.create({
       carId: cars[0]!.id,
       clientName: 'А',
-      clientContact: '',
+      clientPhone: '',
+      clientEmail: '',
       status: 'draft',
       discount: 0,
       createdBy: 'user_admin',
@@ -103,7 +106,8 @@ describe('proposals (mock over localStorage)', () => {
     const b = await mockProposalsProvider.create({
       carId: cars[0]!.id,
       clientName: 'Б',
-      clientContact: '',
+      clientPhone: '',
+      clientEmail: '',
       status: 'draft',
       discount: 0,
       createdBy: 'user_admin',
@@ -121,7 +125,8 @@ describe('proposals (mock over localStorage)', () => {
     const proposal = await mockProposalsProvider.create({
       carId: cars[0]!.id,
       clientName: 'А',
-      clientContact: '',
+      clientPhone: '',
+      clientEmail: '',
       status: 'draft',
       discount: 0,
       createdBy: 'user_admin',

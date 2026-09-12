@@ -48,7 +48,8 @@ export interface PhotosProvider {
 export interface CreateProposalData {
   carId: string
   clientName: string
-  clientContact: string
+  clientPhone: string
+  clientEmail: string
   status: ProposalStatus
   discount: number
   createdBy: string
