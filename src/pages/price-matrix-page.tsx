@@ -19,11 +19,13 @@ function PriceCell({
   serviceId,
   saved,
   commit,
+  className,
 }: {
   carId: string
   serviceId: string
   saved: number | null
   commit: (carId: string, serviceId: string, price: number | null) => Promise<void>
+  className?: string
 }) {
   const [text, setText] = useState(() => fmt(saved))
   const [dirty, setDirty] = useState(false)
@@ -53,7 +55,7 @@ function PriceCell({
       value={text}
       inputMode="numeric"
       placeholder={saved === null ? '—' : undefined}
-      className={`text-right font-bold tabular-nums focus-visible:bg-red-soft ${
+      className={`text-right font-bold tabular-nums focus-visible:bg-red-soft ${className ?? ''} ${
         text !== '' ? 'text-ink' : 'text-sub'
       } ${dirty ? 'text-red' : ''}`}
       onChange={(e) => {
@@ -172,45 +174,80 @@ export function PriceMatrixPage() {
             description="Измените фильтры или добавьте данные через «Автомобили» и «Услуги»."
           />
         ) : (
-          <div className="scrollbar-thin overflow-auto">
-            <table className="w-full border-collapse print-clean">
-              <thead>
-                <tr>
-                  <th className="sticky left-0 z-20 min-w-[220px] border-b border-r border-line bg-[#fbfbfc] px-3 py-2 text-left text-[11px] font-black uppercase tracking-wide text-muted-foreground">
-                    Автомобиль
-                  </th>
-                  {visibleServices.map((service) => (
-                    <th
-                      key={service.id}
-                      className="min-w-[150px] border-b border-line px-3 py-2 text-left text-[11px] font-black uppercase tracking-wide text-muted-foreground"
-                    >
-                      {service.name}
+          <>
+            <div className="scrollbar-thin hidden overflow-auto md:block">
+              <table className="w-full border-collapse print-clean">
+                <thead>
+                  <tr>
+                    <th className="sticky left-0 z-20 min-w-[220px] border-b border-r border-line bg-[#fbfbfc] px-3 py-2 text-left text-[11px] font-black uppercase tracking-wide text-muted-foreground">
+                      Автомобиль
                     </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {visibleCars.map((car) => (
-                  <tr key={car.id} className="group/row hover:bg-soft/50">
-                    <td className="sticky left-0 z-10 border-b border-r border-line bg-[#fbfbfc] px-3 py-1.5 font-bold text-ink group-hover/row:bg-soft/80">
-                      {car.brand} {car.model}
-                      {!car.isActive ? <span className="ml-2 text-[10px] font-black text-sub">(неактивен)</span> : null}
-                    </td>
                     {visibleServices.map((service) => (
-                      <td key={service.id} className="border-b border-line px-3 py-1.5">
-                        <PriceCell
-                          carId={car.id}
-                          serviceId={service.id}
-                          saved={priceByKey.get(`${car.id}:${service.id}`) ?? null}
-                          commit={commit}
-                        />
-                      </td>
+                      <th
+                        key={service.id}
+                        className="min-w-[150px] border-b border-line px-3 py-2 text-left text-[11px] font-black uppercase tracking-wide text-muted-foreground"
+                      >
+                        {service.name}
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {visibleCars.map((car) => (
+                    <tr key={car.id} className="group/row hover:bg-soft/50">
+                      <td className="sticky left-0 z-10 border-b border-r border-line bg-[#fbfbfc] px-3 py-1.5 font-bold text-ink group-hover/row:bg-soft/80">
+                        {car.brand} {car.model}
+                        {!car.isActive ? <span className="ml-2 text-[10px] font-black text-sub">(неактивен)</span> : null}
+                      </td>
+                      {visibleServices.map((service) => (
+                        <td key={service.id} className="border-b border-line px-3 py-1.5">
+                          <PriceCell
+                            carId={car.id}
+                            serviceId={service.id}
+                            saved={priceByKey.get(`${car.id}:${service.id}`) ?? null}
+                            commit={commit}
+                          />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="divide-y divide-line md:hidden">
+              {visibleCars.map((car) => (
+                <div key={car.id} className="p-3">
+                  <div className="mb-2 flex items-center justify-between gap-2">
+                    <div className="text-sm font-black text-ink">
+                      {car.brand} {car.model}
+                      {!car.isActive ? <span className="ml-2 text-[10px] font-black text-sub">(неактивен)</span> : null}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    {visibleServices.map((service) => (
+                      <div
+                        key={service.id}
+                        className="grid grid-cols-[1fr_auto] items-center gap-3 rounded-xl border border-line bg-white px-3 py-2"
+                      >
+                        <span className="text-[13px] font-semibold text-ink">{service.name}</span>
+                        <span className="grid grid-cols-[auto_88px] items-center gap-1">
+                          <span className="text-[12px] font-bold text-sub">₽</span>
+                          <PriceCell
+                            carId={car.id}
+                            serviceId={service.id}
+                            saved={priceByKey.get(`${car.id}:${service.id}`) ?? null}
+                            commit={commit}
+                            className="w-full text-sm"
+                          />
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </Card>
     </div>

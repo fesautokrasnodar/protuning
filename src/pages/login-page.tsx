@@ -72,6 +72,10 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen bg-charcoal lg:grid lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="relative border-b-[3px] border-red bg-charcoal px-4 py-3 lg:hidden">
+        <Logo className="h-9" />
+      </div>
+
       <div className="relative hidden overflow-hidden lg:flex lg:flex-col lg:justify-between lg:p-12">
         <div className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rotate-12 bg-red/90" />
         <Logo className="h-12" />
@@ -90,11 +94,8 @@ export function LoginPage() {
         </div>
       </div>
 
-      <div className="flex min-h-screen items-center justify-center bg-background p-6">
+      <div className="flex min-h-[calc(100dvh-63px)] items-center justify-center bg-background p-6 lg:min-h-screen">
         <div className="w-full max-w-sm">
-          <div className="mb-8 lg:hidden">
-            <Logo className="h-11" />
-          </div>
           <h2 className="text-2xl font-black tracking-tight text-ink">Вход в систему</h2>
           <p className="mt-1 text-sm text-muted-foreground">Введите e-mail и пароль</p>
 

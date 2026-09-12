@@ -32,7 +32,7 @@ const DialogContent = forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'pt-content-in fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-2xl border border-line bg-card p-6 shadow-2xl focus:outline-none',
+        'pt-content-in fixed left-1/2 top-1/2 z-50 grid max-h-[calc(100dvh-1.5rem)] w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 overflow-y-auto rounded-2xl border border-line bg-card p-6 shadow-2xl focus:outline-none max-sm:mx-1',
         className,
       )}
       {...props}

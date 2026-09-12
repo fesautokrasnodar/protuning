@@ -33,6 +33,50 @@ import type { Proposal, ProposalStatus } from '@/types'
 
 type SortKey = 'newest' | 'oldest' | 'total'
 
+function ProposalRowActions({
+  onOpen,
+  onPrint,
+  onCopy,
+  onDelete,
+  canEdit,
+}: {
+  onOpen: () => void
+  onPrint: () => void
+  onCopy: () => void
+  onDelete: () => void
+  canEdit: boolean
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="h-8 w-8">
+          <MoreHorizontal className="h-4 w-4" />
+          <span className="sr-only">Действия</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={onOpen}>
+          <Eye className="h-4 w-4" /> Открыть
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onPrint}>
+          <Printer className="h-4 w-4" /> Печать / PDF
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onCopy}>
+          <Copy className="h-4 w-4" /> Скопировать
+        </DropdownMenuItem>
+        {canEdit ? (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-red" onClick={onDelete}>
+              <Trash2 className="h-4 w-4" /> Удалить
+            </DropdownMenuItem>
+          </>
+        ) : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
 export function ProposalsPage() {
   const { session } = useAuth()
   const navigate = useNavigate()
@@ -183,82 +227,106 @@ export function ProposalsPage() {
             }
           />
         ) : (
-          <div className="scrollbar-thin overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead>Номер</TableHead>
-                  <TableHead>Автомобиль</TableHead>
-                  <TableHead>Клиент</TableHead>
-                  <TableHead>Дата</TableHead>
-                  <TableHead className="text-right">Сумма</TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead className="w-10" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((proposal) => {
-                  const meta = proposalStatusMeta[proposal.status]
-                  const label = carLabel(carById.get(proposal.carId))
-                  return (
-                    <TableRow
-                      key={proposal.id}
-                      className="cursor-pointer"
-                      onClick={() => navigate(`/proposals/${proposal.id}`)}
-                    >
-                      <TableCell className="font-black text-ink">{proposal.number}</TableCell>
-                      <TableCell>{label}</TableCell>
-                      <TableCell>
-                        <div className="font-semibold">{proposal.clientName || '—'}</div>
-                        {proposal.clientPhone || proposal.clientEmail ? (
-                          <div className="text-xs text-muted-foreground">
-                            {proposal.clientPhone || proposal.clientEmail}
-                          </div>
-                        ) : null}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{formatProposalDate(proposal.createdAt)}</TableCell>
-                      <TableCell className="text-right font-black">{formatRub(proposal.total)}</TableCell>
-                      <TableCell>
+          <>
+            <div className="scrollbar-thin hidden overflow-x-auto md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Номер</TableHead>
+                    <TableHead>Автомобиль</TableHead>
+                    <TableHead>Клиент</TableHead>
+                    <TableHead>Дата</TableHead>
+                    <TableHead className="text-right">Сумма</TableHead>
+                    <TableHead>Статус</TableHead>
+                    <TableHead className="w-10" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((proposal) => {
+                    const meta = proposalStatusMeta[proposal.status]
+                    const label = carLabel(carById.get(proposal.carId))
+                    return (
+                      <TableRow
+                        key={proposal.id}
+                        className="cursor-pointer"
+                        onClick={() => navigate(`/proposals/${proposal.id}`)}
+                      >
+                        <TableCell className="font-black text-ink">{proposal.number}</TableCell>
+                        <TableCell>{label}</TableCell>
+                        <TableCell>
+                          <div className="font-semibold">{proposal.clientName || '—'}</div>
+                          {proposal.clientPhone || proposal.clientEmail ? (
+                            <div className="text-xs text-muted-foreground">
+                              {proposal.clientPhone || proposal.clientEmail}
+                            </div>
+                          ) : null}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {formatProposalDate(proposal.createdAt)}
+                        </TableCell>
+                        <TableCell className="text-right font-black">{formatRub(proposal.total)}</TableCell>
+                        <TableCell>
+                          <Badge variant={meta.variant}>{meta.label}</Badge>
+                        </TableCell>
+                        <TableCell onClick={(e) => e.stopPropagation()}>
+                          <ProposalRowActions
+                            canEdit={canEdit}
+                            onOpen={() => navigate(`/proposals/${proposal.id}`)}
+                            onPrint={() => navigate(`/proposals/${proposal.id}/print`)}
+                            onCopy={() => void copyProposal(proposal)}
+                            onDelete={() => setPendingDelete(proposal)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            <div className="divide-y divide-line md:hidden">
+              {filtered.map((proposal) => {
+                const meta = proposalStatusMeta[proposal.status]
+                const label = carLabel(carById.get(proposal.carId))
+                return (
+                  <div
+                    key={proposal.id}
+                    className="cursor-pointer px-4 py-3 transition-colors hover:bg-soft/60"
+                    onClick={() => navigate(`/proposals/${proposal.id}`)}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="font-black text-ink">{proposal.number}</div>
+                        <div className="mt-0.5 text-xs text-muted-foreground">
+                          {formatProposalDate(proposal.createdAt)}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
                         <Badge variant={meta.variant}>{meta.label}</Badge>
-                      </TableCell>
-                      <TableCell onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Действия</span>
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => navigate(`/proposals/${proposal.id}`)}>
-                              <Eye className="h-4 w-4" /> Открыть
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => navigate(`/proposals/${proposal.id}/print`)}>
-                              <Printer className="h-4 w-4" /> Печать / PDF
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => void copyProposal(proposal)}>
-                              <Copy className="h-4 w-4" /> Скопировать
-                            </DropdownMenuItem>
-                            {canEdit ? (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  className="text-red"
-                                  onClick={() => setPendingDelete(proposal)}
-                                >
-                                  <Trash2 className="h-4 w-4" /> Удалить
-                                </DropdownMenuItem>
-                              </>
-                            ) : null}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                        <span onClick={(e) => e.stopPropagation()}>
+                          <ProposalRowActions
+                            canEdit={canEdit}
+                            onOpen={() => navigate(`/proposals/${proposal.id}`)}
+                            onPrint={() => navigate(`/proposals/${proposal.id}/print`)}
+                            onCopy={() => void copyProposal(proposal)}
+                            onDelete={() => setPendingDelete(proposal)}
+                          />
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-sm font-bold text-ink">{label}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {proposal.clientName || 'Без клиента'}
+                      {proposal.clientPhone || proposal.clientEmail
+                        ? ` · ${proposal.clientPhone || proposal.clientEmail}`
+                        : ''}
+                    </div>
+                    <div className="mt-2 text-base font-black text-ink">{formatRub(proposal.total)}</div>
+                  </div>
+                )
+              })}
+            </div>
+          </>
         )}
       </Card>
 

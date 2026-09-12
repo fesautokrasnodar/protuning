@@ -268,7 +268,7 @@ export function CalculatorPage() {
           </p>
         </div>
 
-        <div>
+        <div className="min-w-0">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-[11px] font-black uppercase tracking-[0.14em] text-red">Предпросмотр A4</span>
             <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
