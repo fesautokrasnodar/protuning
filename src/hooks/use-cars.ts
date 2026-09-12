@@ -36,6 +36,16 @@ export function useUpdateCar() {
   })
 }
 
+export function useSetCarPhoto() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, ref }: { id: string; ref: string | null }) => providers.cars.setPhoto(id, ref),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['cars'] })
+    },
+  })
+}
+
 export function useRemoveCar() {
   const qc = useQueryClient()
   return useMutation({

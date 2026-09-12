@@ -20,6 +20,8 @@ export interface CarsProvider {
   listAll(): Promise<Car[]>
   create(input: CarInput): Promise<Car>
   update(id: string, input: CarInput): Promise<Car>
+  /** Установить/заменить/удалить фото (ref из PhotosProvider.upload; null — удалить). */
+  setPhoto(id: string, ref: string | null): Promise<Car>
   remove(id: string): Promise<void>
 }
 

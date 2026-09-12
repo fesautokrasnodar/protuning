@@ -35,6 +35,15 @@ export const mockCarsProvider: CarsProvider = {
     commitDb(db)
     return car
   },
+  async setPhoto(id, ref) {
+    const db = loadDb()
+    const car = db.cars.find((c) => c.id === id)
+    if (!car) throw new DomainError('Автомобиль не найден', 'NOT_FOUND')
+    car.photoUrl = ref
+    car.updatedAt = nowIso()
+    commitDb(db)
+    return car
+  },
   async remove(id) {
     const db = loadDb()
     const inUse = db.proposals.some((p) => p.carId === id)

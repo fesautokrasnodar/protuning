@@ -27,6 +27,18 @@ describe('cars (mock over localStorage)', () => {
     expect(updated.model).toBe('500')
   })
 
+  it('устанавливает, заменяет и удаляет фото автомобиля', async () => {
+    const created = await mockCarsProvider.create({ brand: 'TANK', model: '300' })
+    const withPhoto = await mockCarsProvider.setPhoto(created.id, 'data:image/jpeg;base64,xxx')
+    expect(withPhoto.photoUrl).toBe('data:image/jpeg;base64,xxx')
+
+    const replaced = await mockCarsProvider.setPhoto(created.id, 'data:image/webp;base64,yyy')
+    expect(replaced.photoUrl).toBe('data:image/webp;base64,yyy')
+
+    const cleared = await mockCarsProvider.setPhoto(created.id, null)
+    expect(cleared.photoUrl).toBeNull()
+  })
+
   it('запрещает удаление автомобиля, используемого в КП', async () => {
     const cars = await mockCarsProvider.listAll()
     const target = cars[0]!

@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { Car as CarIcon, Pencil, Plus, Search, Trash2 } from 'lucide-react'
-import { useAllCars, useCreateCar, useRemoveCar, useUpdateCar } from '@/hooks/use-cars'
+import { useAllCars, useCreateCar, useRemoveCar, useSetCarPhoto, useUpdateCar } from '@/hooks/use-cars'
 import { useAuth } from '@/app/providers/auth'
 import { PageHeader } from '@/components/common/page-header'
 import { EmptyState } from '@/components/common/empty-state'
 import { ErrorState } from '@/components/common/error-state'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
+import { PhotoPicker } from '@/components/cars/photo-picker'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -25,12 +26,14 @@ export function CarsPage() {
   const carsQuery = useAllCars()
   const createCar = useCreateCar()
   const updateCar = useUpdateCar()
+  const setCarPhoto = useSetCarPhoto()
   const removeCar = useRemoveCar()
 
   const [search, setSearch] = useState('')
   const [dialog, setDialog] = useState<EditState>(null)
   const [brand, setBrand] = useState('')
   const [model, setModel] = useState('')
+  const [photoRef, setPhotoRef] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof CarInput, string>>>({})
   const [saving, setSaving] = useState(false)
   const [pendingDelete, setPendingDelete] = useState<Car | null>(null)
@@ -48,6 +51,7 @@ export function CarsPage() {
     setDialog({ type: 'create' })
     setBrand('')
     setModel('')
+    setPhotoRef(null)
     setFieldErrors({})
   }
 
@@ -55,6 +59,7 @@ export function CarsPage() {
     setDialog({ type: 'edit', car })
     setBrand(car.brand)
     setModel(car.model)
+    setPhotoRef(car.photoUrl)
     setFieldErrors({})
   }
 
@@ -71,10 +76,17 @@ export function CarsPage() {
     setSaving(true)
     try {
       if (dialog?.type === 'edit') {
+        const { photoUrl } = dialog.car
         await updateCar.mutateAsync({ id: dialog.car.id, input: parsed.data })
+        if (photoRef !== (photoUrl ?? null)) {
+          await setCarPhoto.mutateAsync({ id: dialog.car.id, ref: photoRef })
+        }
         toast.success('Автомобиль обновлён')
       } else {
-        await createCar.mutateAsync(parsed.data)
+        const created = await createCar.mutateAsync(parsed.data)
+        if (photoRef !== null) {
+          await setCarPhoto.mutateAsync({ id: created.id, ref: photoRef })
+        }
         toast.success('Автомобиль добавлен')
       }
       setDialog(null)
@@ -142,6 +154,7 @@ export function CarsPage() {
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
+                <TableHead className="w-16">Фото</TableHead>
                 <TableHead>Модель</TableHead>
                 <TableHead>Статус</TableHead>
                 {canEdit ? <TableHead className="w-24" /> : null}
@@ -150,6 +163,19 @@ export function CarsPage() {
             <TableBody>
               {cars.map((car) => (
                 <TableRow key={car.id}>
+                  <TableCell>
+                    {car.photoUrl ? (
+                      <img
+                        src={car.photoUrl}
+                        alt={`${car.brand} ${car.model}`}
+                        className="h-10 w-14 rounded-md border border-line bg-white object-contain"
+                      />
+                    ) : (
+                      <span className="grid h-10 w-14 place-items-center rounded-md border border-line bg-soft text-sub">
+                        <CarIcon className="h-4 w-4" />
+                      </span>
+                    )}
+                  </TableCell>
                   <TableCell className="font-bold text-ink">
                     {car.brand} {car.model}
                   </TableCell>
@@ -195,6 +221,7 @@ export function CarsPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
+            <PhotoPicker value={photoRef} onChange={setPhotoRef} />
             <div className="space-y-1.5">
               <Label htmlFor="carBrand">Марка</Label>
               <Input
