@@ -9,7 +9,7 @@
 | id | uuid pk | = auth.users.id (на этапе Supabase) |
 | user_id | uuid | связан с auth |
 | full_name | text | |
-| role | text | `admin` \| `manager` |
+| role | text | `admin` (уровень «Пользователь» — без сессии) |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 

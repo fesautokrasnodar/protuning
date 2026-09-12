@@ -12,7 +12,6 @@ import { IS_DEMO } from '@/lib/config'
 
 const DEMO_ACCOUNTS: { label: string; email: string }[] = [
   { label: 'Администратор', email: 'admin@protuning.ru' },
-  { label: 'Менеджер', email: 'manager@protuning.ru' },
 ]
 const DEMO_PASSWORD = 'demo1234'
 

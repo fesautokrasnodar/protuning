@@ -1,8 +1,8 @@
-export type Role = 'admin' | 'manager'
+export type Role = 'admin'
 
 export type ProposalStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'archived'
 
-export const ROLES: readonly Role[] = ['admin', 'manager']
+export const ROLES: readonly Role[] = ['admin']
 
 export const PROPOSAL_STATUSES: readonly ProposalStatus[] = [
   'draft',

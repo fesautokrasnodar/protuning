@@ -2,8 +2,6 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from '@/app/layouts/app-layout'
 import { RequireAuth } from '@/app/guards/require-auth'
 import { RequireRole } from '@/app/guards/require-role'
-import { useAuth } from '@/app/providers/auth'
-import { FullPageLoader } from '@/components/common/spinner'
 import { LoginPage } from '@/pages/login-page'
 import { DashboardPage } from '@/pages/dashboard-page'
 import { CalculatorPage } from '@/pages/calculator-page'
@@ -14,16 +12,13 @@ import { PriceMatrixPage } from '@/pages/price-matrix-page'
 import { CarsPage } from '@/pages/cars-page'
 import { ServicesPage } from '@/pages/services-page'
 import { SettingsPage } from '@/pages/settings-page'
-
 import type { Role } from '@/types'
 
-const MANAGER_ROLES: Role[] = ['admin', 'manager']
+const ADMIN_ROLES: Role[] = ['admin']
 
-/** Гость → калькулятор, авторизованный → дашборд. */
+/** Любой посетитель сразу попадает в калькулятор. */
 function HomeRedirect() {
-  const { session, loading } = useAuth()
-  if (loading) return <FullPageLoader />
-  return <Navigate to={session ? '/dashboard' : '/calculator'} replace />
+  return <Navigate to="/calculator" replace />
 }
 
 export function App() {
@@ -44,7 +39,7 @@ export function App() {
           <Route
             path="/dashboard"
             element={
-              <RequireRole roles={MANAGER_ROLES}>
+              <RequireRole roles={ADMIN_ROLES}>
                 <DashboardPage />
               </RequireRole>
             }
@@ -52,7 +47,7 @@ export function App() {
           <Route
             path="/proposals"
             element={
-              <RequireRole roles={MANAGER_ROLES}>
+              <RequireRole roles={ADMIN_ROLES}>
                 <ProposalsPage />
               </RequireRole>
             }
@@ -60,7 +55,7 @@ export function App() {
           <Route
             path="/proposals/:id"
             element={
-              <RequireRole roles={MANAGER_ROLES}>
+              <RequireRole roles={ADMIN_ROLES}>
                 <ProposalViewPage />
               </RequireRole>
             }
@@ -68,7 +63,7 @@ export function App() {
           <Route
             path="/proposals/:id/print"
             element={
-              <RequireRole roles={MANAGER_ROLES}>
+              <RequireRole roles={ADMIN_ROLES}>
                 <ProposalPrintPage />
               </RequireRole>
             }
@@ -76,7 +71,7 @@ export function App() {
           <Route
             path="/price-matrix"
             element={
-              <RequireRole roles={MANAGER_ROLES}>
+              <RequireRole roles={ADMIN_ROLES}>
                 <PriceMatrixPage />
               </RequireRole>
             }
@@ -84,7 +79,7 @@ export function App() {
           <Route
             path="/cars"
             element={
-              <RequireRole roles={MANAGER_ROLES}>
+              <RequireRole roles={ADMIN_ROLES}>
                 <CarsPage />
               </RequireRole>
             }
@@ -92,7 +87,7 @@ export function App() {
           <Route
             path="/services"
             element={
-              <RequireRole roles={['admin']}>
+              <RequireRole roles={ADMIN_ROLES}>
                 <ServicesPage />
               </RequireRole>
             }
@@ -100,7 +95,7 @@ export function App() {
           <Route
             path="/settings"
             element={
-              <RequireRole roles={['admin']}>
+              <RequireRole roles={ADMIN_ROLES}>
                 <SettingsPage />
               </RequireRole>
             }

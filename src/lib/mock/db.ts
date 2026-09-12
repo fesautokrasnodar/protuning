@@ -28,7 +28,6 @@ function demoUsers(): DemoUser[] {
   }
   return [
     { id: 'user_admin', email: 'admin@protuning.ru', fullName: 'Администратор', role: 'admin', ...base },
-    { id: 'user_manager', email: 'manager@protuning.ru', fullName: 'Менеджер', role: 'manager', ...base },
   ]
 }
 

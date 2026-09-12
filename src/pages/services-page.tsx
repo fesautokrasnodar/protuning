@@ -35,7 +35,7 @@ export function ServicesPage() {
   const [pendingDelete, setPendingDelete] = useState<Service | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const canEdit = session?.role === 'admin' || session?.role === 'manager'
+  const canEdit = session?.role === 'admin'
 
   const query = search.trim().toLowerCase()
   const services = useMemo(

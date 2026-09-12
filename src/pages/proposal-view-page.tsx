@@ -32,7 +32,7 @@ export function ProposalViewPage() {
 
   const proposal = proposalQuery.data
   const car = proposal ? carsQuery.data?.find((c) => c.id === proposal.carId) : undefined
-  const canEdit = session?.role === 'admin' || session?.role === 'manager'
+  const canEdit = session?.role === 'admin'
 
   if (proposalQuery.isLoading || carsQuery.isLoading) {
     return (

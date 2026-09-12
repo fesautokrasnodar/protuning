@@ -39,7 +39,7 @@ export function CarsPage() {
   const [pendingDelete, setPendingDelete] = useState<Car | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const canEdit = session?.role === 'admin' || session?.role === 'manager'
+  const canEdit = session?.role === 'admin'
 
   const query = search.trim().toLowerCase()
   const cars = useMemo(

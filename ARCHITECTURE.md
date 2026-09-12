@@ -45,32 +45,32 @@ interface AuthProvider     { getSession(): Promise<Session|null>; login(email,pw
 
 | Path | Страница | Доступ |
 |---|---|---|
-| `/login` | LoginPage | guest (redirect на `/calculator` при наличии сессии) |
-| `/` | → redirect `/dashboard` | auth; для гостя → `/calculator` |
-| `/calculator` | CalculatorPage | все (гость: без сохранения, печать/PDF/копирование) |
-| `/dashboard` | DashboardPage | manager/admin |
-| `/proposals` | ProposalsPage | manager/admin |
-| `/proposals/:id` | ProposalViewPage | manager/admin |
-| `/proposals/:id/print` | ProposalPrintPage | manager/admin |
-| `/price-matrix` | PriceMatrixPage | manager/admin |
-| `/cars` | CarsPage | manager/admin |
+| `/` | → redirect `/calculator` | все |
+| `/calculator` | CalculatorPage | все (Пользователь: без сохранения, печать/PDF/копирование) |
+| `/login` | LoginPage | Пользователь (redirect на `/dashboard` при админ-сессии) |
+| `/dashboard` | DashboardPage | admin |
+| `/proposals` | ProposalsPage | admin |
+| `/proposals/:id` | ProposalViewPage | admin |
+| `/proposals/:id/print` | ProposalPrintPage | admin |
+| `/price-matrix` | PriceMatrixPage | admin |
+| `/cars` | CarsPage | admin |
 | `/services` | ServicesPage | admin |
 | `/settings` | SettingsPage | admin |
-| `*` | NotFound | auth |
+| `*` | NotFound | все (→ `/calculator`) |
 
-Защита: `RequireAuth` (сессия) + `RequireRole(roles)` (роль из `profiles`). Гостевой уровень — это отсутствие сессии: `RequireRole` уводит гостя на `/login`.
+Защита: `RequireAuth` (сессия) + `RequireRole(roles)` (роль из `profiles`). Уровень «Пользователь» = отсутствие сессии: `RequireRole` уводит его на `/login`.
 
 ## 5. Роли
 
-| Действие | guest | manager | admin |
-|---|---|---|---|
-| Калькулятор: сборка, печать/PDF, копирование | ✔ | ✔ | ✔ |
-| Просмотр дашборда/КП и сохранение КП | — | ✔ | ✔ |
-| Автомобили и прайс-матрица (CRUD) | — | ✔ | ✔ |
-| Услуги / настройки (CRUD) | — | — | ✔ |
-| Export/Import backup | — | — | ✔ |
-| Смена статуса КП | — | ✔ | ✔ |
-| Управление ролями | — | — | +окружение Supabase |
+| Действие | Пользователь (гость) | admin |
+|---|---|---|
+| Калькулятор: сборка, печать/PDF, копирование | ✔ | ✔ |
+| Сохранение КП в архиве | — | ✔ |
+| Дашборд / список КП | — | ✔ |
+| Автомобили, прайс-матрица, услуги (CRUD) | — | ✔ |
+| Настройки, Export/Import backup | — | ✔ |
+| Смена статуса КП | — | ✔ |
+| Управление ролями | — | +окружение Supabase |
 
 ## 6. Калькулятор и КП (business logic)
 
@@ -96,7 +96,7 @@ interface AuthProvider     { getSession(): Promise<Session|null>; login(email,pw
 
 ## 9. Auth (mock-этап)
 
-- Seed-пользователи: `admin@protuning.ru` / `manager@protuning.ru` (пароль `demo1234`), роли из карты. Гость (без сессии) — только калькулятор.
+- Seed-пользователь: `admin@protuning.ru` (пароль `demo1234`). Гость («Пользователь») — только калькулятор без входа.
 - Сессия — в `localStorage`. Все UI-решения идентичны будущей Supabase-версии (единственный `AuthProvider`).
 - Формы логина — zod; на странице — быстрые кнопки входа под роль (демо-режим).
 

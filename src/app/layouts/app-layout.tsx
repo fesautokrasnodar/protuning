@@ -37,22 +37,17 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { to: '/dashboard', label: 'Дашборд', icon: Home, roles: ['admin', 'manager'] },
-  { to: '/calculator', label: 'Калькулятор', icon: Calculator, roles: ['admin', 'manager'] },
-  { to: '/proposals', label: 'Коммерческие предложения', icon: FileText, roles: ['admin', 'manager'] },
-  { to: '/price-matrix', label: 'Прайс-матрица', icon: LayoutGrid, roles: ['admin', 'manager'] },
-  { to: '/cars', label: 'Автомобили', icon: Car, roles: ['admin', 'manager'] },
+  { to: '/dashboard', label: 'Дашборд', icon: Home, roles: ['admin'] },
+  { to: '/calculator', label: 'Калькулятор', icon: Calculator, roles: ['admin'] },
+  { to: '/proposals', label: 'Коммерческие предложения', icon: FileText, roles: ['admin'] },
+  { to: '/price-matrix', label: 'Прайс-матрица', icon: LayoutGrid, roles: ['admin'] },
+  { to: '/cars', label: 'Автомобили', icon: Car, roles: ['admin'] },
   { to: '/services', label: 'Услуги', icon: ListChecks, roles: ['admin'] },
   { to: '/settings', label: 'Настройки', icon: Settings, roles: ['admin'] },
 ]
 
-function roleLabel(role: Role): string {
-  switch (role) {
-    case 'admin':
-      return 'Администратор'
-    case 'manager':
-      return 'Менеджер'
-  }
+function roleLabel(): string {
+  return 'Администратор'
 }
 
 export function AppLayout() {
@@ -60,8 +55,9 @@ export function AppLayout() {
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Гость (без входа) видит только калькулятор.
-  const visibleNav = session ? NAV.filter((item) => item.roles.includes(session.role)) : [NAV[1]]
+  // Админ видит полную навигацию; гость («Пользователь») — только калькулятор через логотип.
+  const isAdmin = session?.role === 'admin'
+  const visibleNav = isAdmin ? NAV : []
 
   function onLogout() {
     setMenuOpen(false)
@@ -72,26 +68,28 @@ export function AppLayout() {
     <div className="min-h-screen bg-background">
       <header className="print-hide sticky top-0 z-40 border-b-[3px] border-red bg-charcoal shadow-[0_6px_18px_rgba(0,0,0,0.12)]">
         <div className="mx-auto flex max-w-[1440px] flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-          <NavLink to={session ? '/dashboard' : '/calculator'} className="flex shrink-0 items-center gap-3" onClick={() => setMenuOpen(false)}>
+          <NavLink to="/calculator" className="flex shrink-0 items-center gap-3" onClick={() => setMenuOpen(false)}>
             <Logo className="h-9" />
           </NavLink>
-          <nav className="hidden items-center gap-1 overflow-x-auto md:flex">
-            {visibleNav.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={({ isActive }) =>
-                  cn(
-                    'flex shrink-0 items-center gap-1.5 rounded-lg border border-transparent px-3 py-2 text-[13px] font-bold text-zinc-300 transition-colors hover:text-white',
-                    isActive && 'border-red bg-red text-white hover:text-white',
-                  )
-                }
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
+          {visibleNav.length > 0 ? (
+            <nav className="hidden items-center gap-1 overflow-x-auto md:flex">
+              {visibleNav.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) =>
+                    cn(
+                      'flex shrink-0 items-center gap-1.5 rounded-lg border border-transparent px-3 py-2 text-[13px] font-bold text-zinc-300 transition-colors hover:text-white',
+                      isActive && 'border-red bg-red text-white hover:text-white',
+                    )
+                  }
+                >
+                  <item.icon className="h-4 w-4" />
+                  {item.label}
+                </NavLink>
+              ))}
+            </nav>
+          ) : null}
           <div className="ml-auto flex items-center gap-3">
             {session ? (
               <>
@@ -111,7 +109,7 @@ export function AppLayout() {
                     <DropdownMenuLabel>
                       {session.fullName}
                       <div className="mt-0.5">
-                        <Badge variant="outline">{roleLabel(session.role)}</Badge>
+                        <Badge variant="outline">{roleLabel()}</Badge>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
@@ -143,7 +141,7 @@ export function AppLayout() {
           </div>
         </div>
 
-        {menuOpen ? (
+        {menuOpen && session ? (
           <nav className="border-t border-zinc-800 bg-charcoal px-4 py-3 md:hidden">
             <div className="flex flex-col gap-1">
               {visibleNav.map((item) => (
@@ -162,23 +160,13 @@ export function AppLayout() {
                   {item.label}
                 </NavLink>
               ))}
-              {session ? (
-                <button
-                  type="button"
-                  onClick={onLogout}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[15px] font-bold text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
-                >
-                  <LogOut className="h-5 w-5" /> Выйти
-                </button>
-              ) : (
-                <Link
-                  to="/login"
-                  onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[15px] font-bold text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
-                >
-                  <LogIn className="h-5 w-5" /> Войти
-                </Link>
-              )}
+              <button
+                type="button"
+                onClick={onLogout}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[15px] font-bold text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-white"
+              >
+                <LogOut className="h-5 w-5" /> Выйти
+              </button>
             </div>
           </nav>
         ) : null}

@@ -118,7 +118,7 @@ export function ProposalsPage() {
     }
   })
 
-  const canEdit = session?.role === 'admin' || session?.role === 'manager'
+  const canEdit = session?.role === 'admin'
 
   async function confirmDelete() {
     if (!pendingDelete) return

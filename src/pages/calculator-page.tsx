@@ -42,7 +42,7 @@ export function CalculatorPage() {
   const [saving, setSaving] = useState(false)
 
   const cars = carsQuery.data ?? []
-  const canSave = session?.role === 'admin' || session?.role === 'manager'
+  const canSave = session?.role === 'admin'
 
   const options: ServiceChoice[] = useMemo(() => {
     if (!carId) return []

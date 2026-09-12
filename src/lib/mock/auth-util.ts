@@ -11,7 +11,7 @@ export interface DemoUser {
   id: string
   email: string
   fullName: string
-  role: 'admin' | 'manager'
+  role: 'admin'
   passwordHash: string
 }
 
