@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PRO-TUNING — матрица цен</title>
+<style>
+:root{--red:#e31b23;--bg:#f5f5f6;--line:#e3e3e7;--muted:#777}*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:var(--bg);color:#111}.wrap{max-width:1500px;margin:auto;padding:26px 18px 60px}.top{display:flex;gap:20px;justify-content:space-between;align-items:center;margin-bottom:22px}.logo{width:270px}.back{text-decoration:none;color:#111;background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:12px}.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.05)}h1{font-size:30px;margin:0 0 7px}.muted{color:var(--muted);font-size:14px;line-height:1.5}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.btn{border:0;padding:11px 14px;border-radius:10px;font-weight:800;cursor:pointer}.red{background:var(--red);color:#fff}.dark{background:#111;color:#fff}.light{background:#f1f1f3;color:#111}.file{display:none}.status{margin-left:auto;font-size:13px;color:#666;align-self:center}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:14px;max-height:72vh}table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;background:#fff}th,td{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:0;text-align:left}thead th{position:sticky;top:0;z-index:4;background:#fafafa}.serviceHead,.serviceCell{position:sticky;left:0;z-index:3;background:#fff;min-width:310px;max-width:310px}.serviceHead{z-index:6;background:#fafafa}.iconHead,.iconCell{position:sticky;left:310px;z-index:3;background:#fff;width:80px;min-width:80px;text-align:center}.iconHead{z-index:6;background:#fafafa}.modelHead{min-width:180px;width:180px;padding:10px;background:#fafafa}.modelHead .headrow{display:flex;gap:6px;align-items:center}.modelHead input{width:100%;min-width:0;border:1px solid #ddd;border-radius:8px;padding:7px 8px;font:inherit;font-size:12px;background:#fff}.modelHead input+input{margin-top:6px}.removeCol{flex:0 0 auto;border:0;background:#fff0f1;color:#c4141c;border-radius:7px;width:28px;height:28px;cursor:pointer;font-weight:900}.cellInput{display:block;width:100%;height:48px;border:0;padding:9px 10px;background:transparent;font:inherit}.cellInput:focus{outline:2px solid #ffd0d2;outline-offset:-2px;background:#fff}.serviceCell .cellInput{font-weight:700}.iconCell .cellInput{text-align:center;font-size:20px}.priceCell{min-width:180px;width:180px}.priceWrap{position:relative}.priceWrap input{padding-right:30px;text-align:right;font-variant-numeric:tabular-nums}.priceWrap span{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#aaa;pointer-events:none}.rowAction{width:42px;min-width:42px;text-align:center;background:#fff}.delRow{border:0;background:transparent;color:#bbb;cursor:pointer;width:42px;height:48px;font-size:18px}.delRow:hover{color:var(--red)}.tip{background:#fff7f7;border:1px solid #ffd8da;border-radius:14px;padding:13px 15px;margin-top:16px;font-size:13px;line-height:1.5}.badge{display:inline-block;background:#111;color:#fff;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;color:#777;font-size:12px}.emptyMark{display:inline-block;width:18px;height:12px;border:1px solid #ddd;background:#fafafa;vertical-align:-2px;margin-right:5px}
+@media(max-width:650px){.top{align-items:flex-start}.logo{width:210px}.status{width:100%;margin:0}.serviceHead,.serviceCell{min-width:220px;max-width:220px}.iconHead,.iconCell{left:220px}}
+</style></head><body><div class="wrap">
+<div class="top"><img class="logo" src="assets/logo.png" alt="PRO-TUNING"><a class="back" href="index.html">← Калькулятор</a></div>
+<div class="card"><span class="badge">ПРАЙС-МАТРИЦА</span><h1>Стоимость услуг по моделям</h1><div class="muted">Строки — единый набор услуг. Каждый вертикальный столбец — отдельная модель автомобиля. В пересечении укажите стоимость услуги для этой модели.</div>
+<div class="toolbar"><button class="btn red" id="addModel">+ Добавить модель</button><button class="btn light" id="addService">+ Добавить услугу</button><button class="btn dark" id="save">Сохранить</button><button class="btn light" id="exportCsv">Экспорт CSV</button><label class="btn light">Импорт CSV<input id="importCsv" class="file" type="file" accept=".csv,text/csv"></label><button class="btn light" id="reset">Вернуть пример</button><span class="status" id="status"></span></div>
+<div class="tablewrap"><table id="matrix"></table></div>
+<div class="legend"><span><span class="emptyMark"></span>Пустая цена = услуга не предлагается / цена не задана</span><span>Все изменения попадут в калькулятор после кнопки «Сохранить»</span></div>
+<div class="tip"><b>Как заполнять:</b> добавьте нужные модели столбцами → при необходимости дополните список услуг → внесите цены по пересечениям → нажмите «Сохранить». Название услуги задается один раз и используется для всех моделей.</div>
+</div></div>
+<script>
+const DEFAULT_SERVICES=[
+ ['Оклейка кузова защитной пленкой','🛡️'],['Керамическое покрытие','✨'],['Полировка кузова','🚘'],['Шумоизоляция салона','🔇'],['Тонировка стекол','◩'],['Антихром','◼'],['Защита фар пленкой','💡'],['Дооснащение / электрика','🔧']
+];
+const DEFAULT_MODELS=[
+ {brand:'VOYAH',model:'Dream'},{brand:'VOYAH',model:'Free'},{brand:'EXEED',model:'VX'}
+];
+const DEFAULT_PRICES=[
+ [220000,180000,190000],[45000,40000,42000],[35000,'',''],[120000,'',''],[28000,'',''],[50000,'',''],[18000,'',''],[40000,'','']
+];
+let services=[],models=[],prices=[];
+const matrix=document.querySelector('#matrix'),status=document.querySelector('#status');
+const esc=(s='')=>String(s).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+function defaults(){services=structuredClone(DEFAULT_SERVICES).map(x=>({name:x[0],icon:x[1]}));models=structuredClone(DEFAULT_MODELS);prices=structuredClone(DEFAULT_PRICES)}
+function load(){
+ try{
+   const flat=JSON.parse(localStorage.getItem('proTuningPrices')||'null');
+   if(Array.isArray(flat)&&flat.length){fromFlat(flat)} else defaults();
+ }catch(e){defaults()}
+ render();
+}
+function fromFlat(flat){
+ const serviceMap=[];const modelMap=[];
+ flat.forEach(r=>{
+   if(r.service&&!serviceMap.some(x=>x.name===r.service))serviceMap.push({name:r.service,icon:r.icon||'🔧'});
+   if(r.brand&&r.model&&!modelMap.some(x=>x.brand===r.brand&&x.model===r.model))modelMap.push({brand:r.brand,model:r.model});
+ });
+ services=serviceMap.length?serviceMap:structuredClone(DEFAULT_SERVICES).map(x=>({name:x[0],icon:x[1]}));
+ models=modelMap.length?modelMap:structuredClone(DEFAULT_MODELS);
+ prices=services.map(s=>models.map(m=>{const r=flat.find(x=>x.service===s.name&&x.brand===m.brand&&x.model===m.model);return r?Number(r.price)||0:''}));
+}
+function render(){
+ let html='<thead><tr><th class="serviceHead" style="padding:12px 10px">Услуга</th><th class="iconHead" style="padding:12px 6px">Иконка</th>';
+ models.forEach((m,j)=>{html+=`<th class="modelHead"><div class="headrow"><input data-type="brand" data-col="${j}" value="${esc(m.brand)}" placeholder="Марка"><button class="removeCol" data-col="${j}" title="Удалить модель">×</button></div><input data-type="model" data-col="${j}" value="${esc(m.model)}" placeholder="Модель"></th>`});
+ html+='<th class="rowAction"></th></tr></thead><tbody>';
+ services.forEach((s,i)=>{
+   html+=`<tr><td class="serviceCell"><input class="cellInput" data-type="service" data-row="${i}" value="${esc(s.name)}" placeholder="Название услуги"></td><td class="iconCell"><input class="cellInput" data-type="icon" data-row="${i}" value="${esc(s.icon||'🔧')}"></td>`;
+   models.forEach((m,j)=>{const v=prices[i]?.[j]??'';html+=`<td class="priceCell"><div class="priceWrap"><input class="cellInput" data-type="price" data-row="${i}" data-col="${j}" type="number" min="0" step="100" value="${v}" placeholder="—"><span>₽</span></div></td>`});
+   html+=`<td class="rowAction"><button class="delRow" data-row="${i}" title="Удалить услугу">×</button></td></tr>`;
+ });
+ html+='</tbody>';matrix.innerHTML=html;bind();
+}
+function bind(){
+ matrix.querySelectorAll('input').forEach(inp=>inp.oninput=e=>{
+   const t=e.target.dataset.type,r=+e.target.dataset.row,c=+e.target.dataset.col;
+   if(t==='brand'||t==='model')models[c][t]=e.target.value;
+   else if(t==='service')services[r].name=e.target.value;
+   else if(t==='icon')services[r].icon=e.target.value;
+   else if(t==='price')prices[r][c]=e.target.value===''?'':Number(e.target.value);
+   dirty();
+ });
+ matrix.querySelectorAll('.removeCol').forEach(b=>b.onclick=()=>{const c=+b.dataset.col;models.splice(c,1);prices.forEach(r=>r.splice(c,1));render();dirty()});
+ matrix.querySelectorAll('.delRow').forEach(b=>b.onclick=()=>{const r=+b.dataset.row;services.splice(r,1);prices.splice(r,1);render();dirty()});
+}
+function dirty(){status.textContent='Есть несохраненные изменения'}
+function toFlat(){const out=[];services.forEach((s,i)=>models.forEach((m,j)=>{const v=prices[i]?.[j];if(s.name.trim()&&m.brand.trim()&&m.model.trim()&&v!==''&&v!==null&&v!==undefined){out.push({id:out.length+1,brand:m.brand.trim(),model:m.model.trim(),service:s.name.trim(),price:Number(v)||0,icon:(s.icon||'🔧').trim()||'🔧'})}}));return out}
+function save(){const flat=toFlat();localStorage.setItem('proTuningPrices',JSON.stringify(flat));status.textContent=`Сохранено ✓ ${flat.length} цен`;setTimeout(()=>status.textContent='',2200)}
+document.querySelector('#save').onclick=save;
+document.querySelector('#addModel').onclick=()=>{models.push({brand:'',model:''});prices.forEach(r=>r.push(''));render();matrix.querySelector(`[data-type="brand"][data-col="${models.length-1}"]`).focus();dirty()};
+document.querySelector('#addService').onclick=()=>{services.push({name:'',icon:'🔧'});prices.push(models.map(()=>''));render();matrix.querySelector(`[data-type="service"][data-row="${services.length-1}"]`).focus();dirty()};
+document.querySelector('#reset').onclick=()=>{if(confirm('Вернуть демонстрационную матрицу цен?')){defaults();render();save()}};
+function csvCell(v){const s=String(v??'');return /[;"\n]/.test(s)?'"'+s.replaceAll('"','""')+'"':s}
+document.querySelector('#exportCsv').onclick=()=>{
+ const head1=['Услуга','Иконка',...models.map(m=>m.brand)];const head2=['','',...models.map(m=>m.model)];
+ const lines=[head1,head2,...services.map((s,i)=>[s.name,s.icon,...models.map((_,j)=>prices[i]?.[j]??'')])].map(a=>a.map(csvCell).join(';')).join('\n');
+ const blob=new Blob(['\ufeff'+lines],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pro-tuning-price-matrix.csv';a.click();URL.revokeObjectURL(a.href);
+};
+function parseCsv(text){const out=[];let row=[],cell='',q=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(q&&c==='"'&&n==='"'){cell+='"';i++}else if(c==='"'){q=!q}else if(!q&&(c===';'||c===',')){row.push(cell);cell=''}else if(!q&&(c==='\n'||c==='\r')){if(c==='\r'&&n==='\n')i++;row.push(cell);if(row.some(x=>x.trim()))out.push(row);row=[];cell=''}else cell+=c}row.push(cell);if(row.some(x=>x.trim()))out.push(row);return out}
+document.querySelector('#importCsv').onchange=async e=>{const f=e.target.files[0];if(!f)return;const a=parseCsv(await f.text());if(a.length<3){alert('Не удалось распознать матрицу');return}models=(a[0].slice(2)).map((brand,j)=>({brand:(brand||'').trim(),model:(a[1][j+2]||'').trim()}));services=a.slice(2).map(r=>({name:(r[0]||'').trim(),icon:(r[1]||'🔧').trim()||'🔧'})).filter(s=>s.name);prices=a.slice(2).filter(r=>(r[0]||'').trim()).map(r=>models.map((_,j)=>{const x=(r[j+2]||'').replace(/\s/g,'');return x===''?'':Number(x)||0}));render();dirty();e.target.value=''};
+load();
+</script></body></html>
