@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 test('нет горизонтального переполнения страниц на мобильном', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
-  await page.goto('/')
+  await page.goto('/#/login')
   await page.getByRole('heading', { name: 'Вход в систему' }).waitFor()
   await page.getByRole('button', { name: 'Администратор' }).click()
   await page.getByRole('heading', { name: /Здравствуйте/ }).waitFor()
@@ -22,7 +22,7 @@ test('нет горизонтального переполнения стран�
 })
 
 test('бургер-меню на мобильных, навбар на десктопе', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/#/login')
   await page.getByRole('heading', { name: 'Вход в систему' }).waitFor()
   await page.getByRole('button', { name: 'Администратор' }).click()
   await page.getByRole('heading', { name: /Здравствуйте/ }).waitFor()
@@ -41,7 +41,7 @@ test('бургер-меню на мобильных, навбар на деск�
   expect(tableVisible).toBe(false)
 
   await page.setViewportSize({ width: 1280, height: 800 })
-  await page.reload()
+  await page.goto('/#/price-matrix')
   await page.getByRole('heading', { name: 'Прайс-матрица' }).waitFor()
   await expect(page.getByRole('button', { name: 'Открыть меню' })).toHaveCount(0)
   const desktopTableVisible = await page.evaluate(() => {

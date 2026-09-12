@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Printer, Save } from 'lucide-react'
+import { Printer, Save, Copy } from 'lucide-react'
 import { toast } from 'sonner'
 import { useCars } from '@/hooks/use-cars'
 import { useServices } from '@/hooks/use-services'
@@ -19,7 +19,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { availableServicesForCar, computeTotals, priceForCar } from '@/lib/calc'
-import { parsePrice } from '@/lib/money'
+import { parsePrice, formatRub } from '@/lib/money'
 import { formatPhoneMask } from '@/lib/phone'
 import { proposalInputSchema } from '@/lib/validation/schemas'
 
@@ -41,6 +41,7 @@ export function CalculatorPage() {
   const [saving, setSaving] = useState(false)
 
   const cars = carsQuery.data ?? []
+  const canSave = session?.role === 'admin' || session?.role === 'manager'
 
   const options: ServiceChoice[] = useMemo(() => {
     if (!carId) return []
@@ -135,6 +136,27 @@ export function CalculatorPage() {
       toast.error(error instanceof Error ? error.message : 'Не удалось сохранить КП')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function copyProposalText() {
+    const lines = [
+      'КОММЕРЧЕСКОЕ ПРЕДЛОЖЕНИЕ PRO-TUNING',
+      view.carLabel,
+      view.clientName ? `Клиент: ${view.clientName}` : '',
+      view.clientPhone ? `Телефон: ${view.clientPhone}` : '',
+      view.clientEmail ? `E-mail: ${view.clientEmail}` : '',
+      '',
+      ...view.items.map((item) => `• ${item.name}: ${formatRub(item.price)}`),
+      '',
+      `ИТОГО: ${formatRub(view.total)}`,
+    ]
+    const text = lines.filter((l) => l !== undefined && l !== '').join('\n')
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success('Текст КП скопирован')
+    } catch {
+      toast.error('Не удалось скопировать текст')
     }
   }
 
@@ -259,12 +281,20 @@ export function CalculatorPage() {
             <Button variant="dark" onClick={() => window.print()} disabled={saving}>
               <Printer className="h-4 w-4" /> Печать / PDF
             </Button>
-            <Button onClick={() => void saveProposal()} disabled={saving}>
-              <Save className="h-4 w-4" /> {saving ? 'Сохраняем…' : 'Сохранить КП'}
-            </Button>
+            {canSave ? (
+              <Button onClick={() => void saveProposal()} disabled={saving}>
+                <Save className="h-4 w-4" /> {saving ? 'Сохраняем…' : 'Сохранить КП'}
+              </Button>
+            ) : (
+              <Button variant="outline" onClick={() => void copyProposalText()}>
+                <Copy className="h-4 w-4" /> Копировать КП
+              </Button>
+            )}
           </div>
           <p className="text-center text-[11px] text-muted-foreground">
-            Сохранённые КП собираются в разделе «Коммерческие предложения».
+            {canSave
+              ? 'Сохранённые КП собираются в разделе «Коммерческие предложения».'
+              : 'КП можно распечатать или скопировать прямо здесь. Для сохранения войдите как менеджер или администратор.'}
           </p>
         </div>
 

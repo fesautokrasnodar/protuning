@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { ShieldCheck, KeyRound } from 'lucide-react'
 import { useAuth } from '@/app/providers/auth'
@@ -13,7 +13,6 @@ import { IS_DEMO } from '@/lib/config'
 const DEMO_ACCOUNTS: { label: string; email: string }[] = [
   { label: 'Администратор', email: 'admin@protuning.ru' },
   { label: 'Менеджер', email: 'manager@protuning.ru' },
-  { label: 'Наблюдатель', email: 'viewer@protuning.ru' },
 ]
 const DEMO_PASSWORD = 'demo1234'
 
@@ -156,6 +155,15 @@ export function LoginPage() {
               </p>
             </div>
           ) : null}
+
+          <div className="mt-4">
+            <Button asChild variant="outline" className="w-full" disabled={submitting}>
+              <Link to="/calculator">Открыть калькулятор без входа</Link>
+            </Button>
+            <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
+              Гость собирает КП и выгружает его без сохранения в архиве.
+            </p>
+          </div>
 
           <div className="mt-8 border-t border-line pt-4 text-center text-[11px] text-muted-foreground">
             PRO-TUNING · калькулятор и прайс-матрица

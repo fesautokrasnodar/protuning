@@ -45,28 +45,29 @@ interface AuthProvider     { getSession(): Promise<Session|null>; login(email,pw
 
 | Path | Страница | Доступ |
 |---|---|---|
-| `/login` | LoginPage | anonymous |
-| `/` | → redirect `/dashboard` | auth |
-| `/dashboard` | DashboardPage | все роли |
-| `/calculator` | CalculatorPage | manager/admin |
-| `/proposals` | ProposalsPage | все роли (запись — manager/admin) |
-| `/proposals/:id` | ProposalViewPage | все роли |
-| `/proposals/:id/print` | ProposalPrintPage | все роли |
-| `/price-matrix` | PriceMatrixPage | admin |
-| `/cars` | CarsPage | admin |
+| `/login` | LoginPage | guest (redirect на `/calculator` при наличии сессии) |
+| `/` | → redirect `/dashboard` | auth; для гостя → `/calculator` |
+| `/calculator` | CalculatorPage | все (гость: без сохранения, печать/PDF/копирование) |
+| `/dashboard` | DashboardPage | manager/admin |
+| `/proposals` | ProposalsPage | manager/admin |
+| `/proposals/:id` | ProposalViewPage | manager/admin |
+| `/proposals/:id/print` | ProposalPrintPage | manager/admin |
+| `/price-matrix` | PriceMatrixPage | manager/admin |
+| `/cars` | CarsPage | manager/admin |
 | `/services` | ServicesPage | admin |
 | `/settings` | SettingsPage | admin |
 | `*` | NotFound | auth |
 
-Защита: `RequireAuth` (сессия) + `RequireRole(roles)` (роль из `profiles`).
+Защита: `RequireAuth` (сессия) + `RequireRole(roles)` (роль из `profiles`). Гостевой уровень — это отсутствие сессии: `RequireRole` уводит гостя на `/login`.
 
 ## 5. Роли
 
-| Действие | viewer | manager | admin |
+| Действие | guest | manager | admin |
 |---|---|---|---|
-| Просмотр каталога/КП/дашборда | ✔ | ✔ | ✔ |
-| Калькулятор и сохранение КП | — | ✔ | ✔ |
-| Автомобили/услуги/прайс (CRUD) | — | — | ✔ |
+| Калькулятор: сборка, печать/PDF, копирование | ✔ | ✔ | ✔ |
+| Просмотр дашборда/КП и сохранение КП | — | ✔ | ✔ |
+| Автомобили и прайс-матрица (CRUD) | — | ✔ | ✔ |
+| Услуги / настройки (CRUD) | — | — | ✔ |
 | Export/Import backup | — | — | ✔ |
 | Смена статуса КП | — | ✔ | ✔ |
 | Управление ролями | — | — | +окружение Supabase |
@@ -95,7 +96,7 @@ interface AuthProvider     { getSession(): Promise<Session|null>; login(email,pw
 
 ## 9. Auth (mock-этап)
 
-- Seed-пользователи: `admin@protuning.ru` / `manager@protuning.ru` / `viewer@protuning.ru` (пароль `demo1234`), роли из карты.
+- Seed-пользователи: `admin@protuning.ru` / `manager@protuning.ru` (пароль `demo1234`), роли из карты. Гость (без сессии) — только калькулятор.
 - Сессия — в `localStorage`. Все UI-решения идентичны будущей Supabase-версии (единственный `AuthProvider`).
 - Формы логина — zod; на странице — быстрые кнопки входа под роль (демо-режим).
 

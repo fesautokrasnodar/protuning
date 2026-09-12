@@ -2,6 +2,8 @@ import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AppLayout } from '@/app/layouts/app-layout'
 import { RequireAuth } from '@/app/guards/require-auth'
 import { RequireRole } from '@/app/guards/require-role'
+import { useAuth } from '@/app/providers/auth'
+import { FullPageLoader } from '@/components/common/spinner'
 import { LoginPage } from '@/pages/login-page'
 import { DashboardPage } from '@/pages/dashboard-page'
 import { CalculatorPage } from '@/pages/calculator-page'
@@ -12,6 +14,17 @@ import { PriceMatrixPage } from '@/pages/price-matrix-page'
 import { CarsPage } from '@/pages/cars-page'
 import { ServicesPage } from '@/pages/services-page'
 import { SettingsPage } from '@/pages/settings-page'
+
+import type { Role } from '@/types'
+
+const MANAGER_ROLES: Role[] = ['admin', 'manager']
+
+/** Гость → калькулятор, авторизованный → дашборд. */
+function HomeRedirect() {
+  const { session, loading } = useAuth()
+  if (loading) return <FullPageLoader />
+  return <Navigate to={session ? '/dashboard' : '/calculator'} replace />
+}
 
 export function App() {
   return (
@@ -26,29 +39,44 @@ export function App() {
           }
         />
         <Route path="/print/:id" element={<ProposalPrintPage />} />
-        <Route
-          element={
-            <RequireAuth>
-              <AppLayout />
-            </RequireAuth>
-          }
-        >
-          <Route path="/dashboard" element={<DashboardPage />} />
+        <Route element={<AppLayout />}>
+          <Route path="/calculator" element={<CalculatorPage />} />
           <Route
-            path="/calculator"
+            path="/dashboard"
             element={
-              <RequireRole roles={['admin', 'manager']}>
-                <CalculatorPage />
+              <RequireRole roles={MANAGER_ROLES}>
+                <DashboardPage />
               </RequireRole>
             }
           />
-          <Route path="/proposals" element={<ProposalsPage />} />
-          <Route path="/proposals/:id" element={<ProposalViewPage />} />
-          <Route path="/proposals/:id/print" element={<ProposalPrintPage />} />
+          <Route
+            path="/proposals"
+            element={
+              <RequireRole roles={MANAGER_ROLES}>
+                <ProposalsPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/proposals/:id"
+            element={
+              <RequireRole roles={MANAGER_ROLES}>
+                <ProposalViewPage />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="/proposals/:id/print"
+            element={
+              <RequireRole roles={MANAGER_ROLES}>
+                <ProposalPrintPage />
+              </RequireRole>
+            }
+          />
           <Route
             path="/price-matrix"
             element={
-              <RequireRole roles={['admin']}>
+              <RequireRole roles={MANAGER_ROLES}>
                 <PriceMatrixPage />
               </RequireRole>
             }
@@ -56,7 +84,7 @@ export function App() {
           <Route
             path="/cars"
             element={
-              <RequireRole roles={['admin']}>
+              <RequireRole roles={MANAGER_ROLES}>
                 <CarsPage />
               </RequireRole>
             }
@@ -77,9 +105,9 @@ export function App() {
               </RequireRole>
             }
           />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<HomeRedirect />} />
         </Route>
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<HomeRedirect />} />
       </Routes>
     </HashRouter>
   )
