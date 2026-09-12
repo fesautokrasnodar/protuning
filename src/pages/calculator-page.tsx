@@ -1,0 +1,230 @@
+import { useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Printer, Save } from 'lucide-react'
+import { toast } from 'sonner'
+import { useCars } from '@/hooks/use-cars'
+import { useServices } from '@/hooks/use-services'
+import { usePrices } from '@/hooks/use-prices'
+import { useCreateProposal } from '@/hooks/use-proposals'
+import { useAuth } from '@/app/providers/auth'
+import { CarPicker } from '@/components/calculator/car-picker'
+import { ServicePicker, type ServiceChoice } from '@/components/calculator/service-picker'
+import { TotalBar } from '@/components/calculator/total-bar'
+import { ProposalDocument, type ProposalViewData } from '@/components/proposal/proposal-document'
+import { PageHeader } from '@/components/common/page-header'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/common/error-state'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { availableServicesForCar, computeTotals, priceForCar } from '@/lib/calc'
+import { parsePrice } from '@/lib/money'
+
+export function CalculatorPage() {
+  const { session } = useAuth()
+  const navigate = useNavigate()
+  const carsQuery = useCars()
+  const servicesQuery = useServices()
+  const pricesQuery = usePrices()
+  const createProposal = useCreateProposal()
+
+  const [carId, setCarId] = useState('')
+  const [clientName, setClientName] = useState('')
+  const [clientContact, setClientContact] = useState('')
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [discountInput, setDiscountInput] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  const cars = carsQuery.data ?? []
+
+  const options: ServiceChoice[] = useMemo(() => {
+    if (!carId) return []
+    const services = servicesQuery.data ?? []
+    const prices = pricesQuery.data ?? []
+    const available = availableServicesForCar(services, prices, carId)
+    return available.map((s) => ({
+      id: s.id,
+      name: s.name,
+      price: priceForCar(prices, carId, s.id) ?? 0,
+    }))
+  }, [carId, servicesQuery.data, pricesQuery.data])
+
+  const validSelected = options.filter((o) => selectedIds.includes(o.id))
+  const discount = parsePrice(discountInput) ?? 0
+  const totals = useMemo(
+    () => computeTotals(validSelected.map((o) => o.price), discount),
+    [validSelected, discount],
+  )
+
+  const currentCar = cars.find((c) => c.id === carId) ?? null
+  const proposalDate = new Date().toLocaleDateString('ru-RU')
+
+  const view: ProposalViewData = {
+    date: proposalDate,
+    carLabel: currentCar ? `${currentCar.brand} ${currentCar.model}` : 'Выберите автомобиль',
+    carPhotoUrl: currentCar?.photoUrl ?? null,
+    clientName,
+    clientContact,
+    items: validSelected.map((o, i) => ({ num: i + 1, name: o.name, price: o.price })),
+    subtotal: totals.subtotal,
+    discount: totals.discount,
+    total: totals.total,
+  }
+
+  function toggleService(id: string) {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+  }
+
+  function selectAll() {
+    setSelectedIds(options.map((o) => o.id))
+  }
+
+  function clearAll() {
+    setSelectedIds([])
+  }
+
+  async function saveProposal() {
+    if (!carId) {
+      toast.error('Выберите автомобиль')
+      return
+    }
+    if (validSelected.length === 0) {
+      toast.error('Выберите хотя бы одну услугу')
+      return
+    }
+    if (!clientName.trim()) {
+      toast.error('Укажите клиента')
+      return
+    }
+    if (!session) return
+    setSaving(true)
+    try {
+      const created = await createProposal.mutateAsync({
+        carId,
+        clientName: clientName.trim(),
+        clientContact: clientContact.trim(),
+        status: 'draft',
+        discount: totals.discount,
+        createdBy: session.userId,
+        selection: validSelected.map((o) => ({ serviceId: o.id, serviceName: o.name, price: o.price })),
+      })
+      toast.success(`КП ${created.number} сохранено`)
+      navigate(`/proposals/${created.id}`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Не удалось сохранить КП')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (carsQuery.isLoading || servicesQuery.isLoading || pricesQuery.isLoading) {
+    return (
+      <div className="grid gap-6 lg:grid-cols-[430px_1fr]">
+        <Skeleton className="h-[640px]" />
+        <Skeleton className="h-[1123px]" />
+      </div>
+    )
+  }
+
+  if (carsQuery.isError || servicesQuery.isError || pricesQuery.isError) {
+    return <ErrorState message="Не удалось загрузить данные для калькулятора." />
+  }
+
+  return (
+    <div className="print-mode">
+      <PageHeader
+        kicker="Расчёт"
+        title="Стоимость тюнинга"
+        description="Выберите автомобиль, клиента и услуги — КП формируется автоматически."
+      />
+
+      <div className="grid gap-6 lg:grid-cols-[430px_1fr]">
+        <div className="space-y-4">
+          <Card className="p-5">
+            <CarPicker cars={cars} value={carId} onChange={(id) => setCarId(id)} />
+
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="clientName">Клиент / компания</Label>
+                <Input
+                  id="clientName"
+                  placeholder="Например: Алексей / ООО Компания"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="clientContact">Контакт</Label>
+                <Input
+                  id="clientContact"
+                  placeholder="+7 … / email"
+                  value={clientContact}
+                  onChange={(e) => setClientContact(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <Label htmlFor="discount">Скидка, ₽</Label>
+              <Input
+                id="discount"
+                type="number"
+                min={0}
+                step={500}
+                inputMode="numeric"
+                placeholder="0"
+                value={discountInput}
+                onChange={(e) => setDiscountInput(e.target.value)}
+                className="mt-1.5"
+              />
+              {discount > totals.subtotal ? (
+                <p className="mt-1 text-xs font-semibold text-red">Скидка больше стоимости услуг</p>
+              ) : null}
+            </div>
+          </Card>
+
+          <Card className="p-5">
+            <div className="mb-3 text-[11px] font-black uppercase tracking-[0.14em] text-red">Услуги</div>
+            <ServicePicker
+              options={options}
+              selectedIds={selectedIds}
+              onToggle={toggleService}
+              onSelectAll={selectAll}
+              onClear={clearAll}
+              emptyText={carId ? 'Для этой модели пока нет заполненных цен.' : 'Сначала выберите автомобиль.'}
+            />
+          </Card>
+
+          <TotalBar subtotal={totals.subtotal} discount={totals.discount} total={totals.total} />
+
+          <div className="grid grid-cols-2 gap-2">
+            <Button variant="dark" onClick={() => window.print()} disabled={saving}>
+              <Printer className="h-4 w-4" /> Печать / PDF
+            </Button>
+            <Button onClick={() => void saveProposal()} disabled={saving}>
+              <Save className="h-4 w-4" /> {saving ? 'Сохраняем…' : 'Сохранить КП'}
+            </Button>
+          </div>
+          <p className="text-center text-[11px] text-muted-foreground">
+            Сохранённые КП собираются в разделе «Коммерческие предложения».
+          </p>
+        </div>
+
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[11px] font-black uppercase tracking-[0.14em] text-red">Предпросмотр A4</span>
+            <Button variant="ghost" size="sm" asChild className="text-muted-foreground">
+              <Link to="/proposals">Перейти к КП →</Link>
+            </Button>
+          </div>
+          <div className="scrollbar-thin overflow-x-auto rounded-2xl border border-line bg-[#ececef] p-3">
+            <div className="w-[794px]">
+              <ProposalDocument data={view} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

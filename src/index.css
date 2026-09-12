@@ -1,0 +1,201 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   PRO-TUNING design tokens (преемственность с HTML-прототипом)
+   ============================================================ */
+:root {
+  --red: #d71920;
+  --red-dark: #b31319;
+  --red-soft: #fff1f1;
+  --charcoal: #0d0d0f;
+  --ink: #17171a;
+  --sub: #74747b;
+  --line: #dedee2;
+  --soft: #f4f4f6;
+  --white: #ffffff;
+  --canvas: #ececef;
+
+  --background: var(--soft);
+  --foreground: var(--ink);
+  --card: var(--white);
+  --card-foreground: var(--ink);
+  --popover: var(--white);
+  --popover-foreground: var(--ink);
+  --primary: var(--red);
+  --primary-foreground: var(--white);
+  --secondary: var(--soft);
+  --secondary-foreground: var(--ink);
+  --muted: var(--soft);
+  --muted-foreground: var(--sub);
+  --accent: var(--soft);
+  --accent-foreground: var(--ink);
+  --destructive: var(--red-dark);
+  --destructive-foreground: var(--white);
+  --border: var(--line);
+  --input: #d3d3d8;
+  --ring: var(--red);
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --color-red: var(--red);
+  --color-red-dark: var(--red-dark);
+  --color-red-soft: var(--red-soft);
+  --color-charcoal: var(--charcoal);
+  --color-ink: var(--ink);
+  --color-sub: var(--sub);
+  --color-line: var(--line);
+  --color-soft: var(--soft);
+  --color-canvas: var(--canvas);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: Arial, Helvetica, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+/* ============================================================
+   Animations (диалоги/оверлеи)
+   ============================================================ */
+@keyframes pt-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes pt-content-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+@keyframes pt-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pt-overlay {
+  animation: pt-overlay-in 0.15s ease-out;
+}
+.pt-content-in {
+  animation: pt-content-in 0.16s ease-out;
+}
+.pt-pop-in {
+  animation: pt-pop-in 0.18s ease-out;
+}
+
+/* ============================================================
+   A4 proposal print
+   ============================================================ */
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+  .print-hide {
+    display: none !important;
+  }
+  .print-clean {
+    box-shadow: none !important;
+    border: 0 !important;
+  }
+
+  /* «Живая» печать превью из любой страницы (калькулятор, просмотр):
+     остальной интерфейс скрывается, документ выводится один к одному. */
+  .print-mode * {
+    visibility: hidden !important;
+  }
+  .print-mode .proposal-doc,
+  .print-mode .proposal-doc * {
+    visibility: visible !important;
+  }
+  .print-mode .proposal-doc {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+
+  /* Отдельная страница печати (ProposalPrintPage). */
+  .print-root,
+  .print-root .proposal-doc {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    margin: 0 !important;
+  }
+}
+
+/* ============================================================
+   Small helpers
+   ============================================================ */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #c9c9cf;
+  border-radius: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
