@@ -11,7 +11,8 @@ export const mockAuthProvider: AuthProvider = {
     if (!raw) return null
     try {
       const s = JSON.parse(raw) as Session
-      if (!s.userId || !s.role) return null
+      // Сессии со старой сборки (роль viewer) больше недействительны.
+      if (!s.userId || (s.role !== 'admin' && s.role !== 'manager')) return null
       return s
     } catch {
       return null

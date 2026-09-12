@@ -156,12 +156,15 @@ export function LoginPage() {
             </div>
           ) : null}
 
-          <div className="mt-4">
+          <div className="mt-4 rounded-xl border border-dashed border-line bg-white/60 p-4">
+            <div className="mb-2 text-xs font-black uppercase tracking-wide text-muted-foreground">
+              Уровень «Пользователь»
+            </div>
             <Button asChild variant="outline" className="w-full" disabled={submitting}>
               <Link to="/calculator">Открыть калькулятор без входа</Link>
             </Button>
-            <p className="mt-1.5 text-center text-[11px] text-muted-foreground">
-              Гость собирает КП и выгружает его без сохранения в архиве.
+            <p className="mt-1.5 text-center text-[11px] leading-relaxed text-muted-foreground">
+              Сборка КП: печать / PDF / копирование. Сохранение в архиве — после входа.
             </p>
           </div>
 

@@ -17,6 +17,7 @@ import { ErrorState } from '@/components/common/error-state'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { availableServicesForCar, computeTotals, priceForCar } from '@/lib/calc'
 import { parsePrice, formatRub } from '@/lib/money'
@@ -179,6 +180,7 @@ export function CalculatorPage() {
         kicker="Расчёт"
         title="Стоимость тюнинга"
         description="Выберите автомобиль, клиента и услуги — КП формируется автоматически."
+        actions={!canSave ? <Badge variant="outline">Пользователь · без входа</Badge> : undefined}
       />
 
       <div className="grid gap-6 lg:grid-cols-[430px_1fr]">
