@@ -165,22 +165,22 @@ export function CalculatorPage() {
             <CarPicker cars={cars} value={carId} onChange={(id) => setCarId(id)} />
 
             <div className="mt-4 space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="clientName">
+                  Клиент / компания <span className="font-normal text-muted-foreground">(необязательно)</span>
+                </Label>
+                <Input
+                  id="clientName"
+                  placeholder="Например: Алексей / ООО Компания"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  aria-invalid={Boolean(fieldErrors.clientName)}
+                />
+                {fieldErrors.clientName ? (
+                  <p className="text-xs font-semibold text-red">{fieldErrors.clientName}</p>
+                ) : null}
+              </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1.5">
-                  <Label htmlFor="clientName">
-                    Клиент / компания <span className="font-normal text-muted-foreground">(необязательно)</span>
-                  </Label>
-                  <Input
-                    id="clientName"
-                    placeholder="Например: Алексей / ООО Компания"
-                    value={clientName}
-                    onChange={(e) => setClientName(e.target.value)}
-                    aria-invalid={Boolean(fieldErrors.clientName)}
-                  />
-                  {fieldErrors.clientName ? (
-                    <p className="text-xs font-semibold text-red">{fieldErrors.clientName}</p>
-                  ) : null}
-                </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="clientPhone">
                     Телефон <span className="font-normal text-muted-foreground">(необязательно)</span>
@@ -200,25 +200,25 @@ export function CalculatorPage() {
                     <p className="text-xs font-semibold text-red">{fieldErrors.clientPhone}</p>
                   ) : null}
                 </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="clientEmail">
-                  E-mail <span className="font-normal text-muted-foreground">(необязательно)</span>
-                </Label>
-                <Input
-                  id="clientEmail"
-                  type="email"
-                  placeholder="client@company.ru"
-                  value={clientEmail}
-                  onChange={(e) => {
-                    setClientEmail(e.target.value)
-                    setFieldErrors((p) => ({ ...p, clientEmail: undefined }))
-                  }}
-                  aria-invalid={Boolean(fieldErrors.clientEmail)}
-                />
-                {fieldErrors.clientEmail ? (
-                  <p className="text-xs font-semibold text-red">{fieldErrors.clientEmail}</p>
-                ) : null}
+                <div className="space-y-1.5">
+                  <Label htmlFor="clientEmail">
+                    E-mail <span className="font-normal text-muted-foreground">(необязательно)</span>
+                  </Label>
+                  <Input
+                    id="clientEmail"
+                    type="email"
+                    placeholder="client@company.ru"
+                    value={clientEmail}
+                    onChange={(e) => {
+                      setClientEmail(e.target.value)
+                      setFieldErrors((p) => ({ ...p, clientEmail: undefined }))
+                    }}
+                    aria-invalid={Boolean(fieldErrors.clientEmail)}
+                  />
+                  {fieldErrors.clientEmail ? (
+                    <p className="text-xs font-semibold text-red">{fieldErrors.clientEmail}</p>
+                  ) : null}
+                </div>
               </div>
             </div>
 

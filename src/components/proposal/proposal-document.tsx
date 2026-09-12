@@ -46,7 +46,7 @@ export function ProposalDocument({ data }: { data: ProposalViewData }) {
         </div>
       </header>
 
-      <div className="relative z-10 grid min-h-[300px] grid-cols-[1.05fr_0.95fr]">
+      <div className="relative z-10 grid min-h-[300px] grid-cols-2">
         <div className="px-[36px] py-[42px]">
           <div className="text-[13px] font-black uppercase tracking-[0.14em] text-red">PRO-TUNING</div>
           <h1 className="mt-2 text-[34px] font-black leading-[1.05] tracking-tight text-ink">{data.carLabel}</h1>
