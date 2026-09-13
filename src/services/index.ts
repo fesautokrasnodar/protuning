@@ -3,6 +3,7 @@ import type {
   AuthProvider,
   BackupProvider,
   CarsProvider,
+  CatalogImportProvider,
   PhotosProvider,
   PricesProvider,
   ProposalsProvider,
@@ -11,6 +12,7 @@ import type {
 import { mockAuthProvider } from '@/services/mock-auth'
 import { mockBackupProvider } from '@/services/mock-backup'
 import { mockCarsProvider } from '@/services/mock-cars'
+import { mockCatalogImportProvider } from '@/services/mock-import'
 import { mockPhotosProvider } from '@/services/mock-photos'
 import { mockPricesProvider } from '@/services/mock-prices'
 import { mockProposalsProvider } from '@/services/mock-proposals'
@@ -24,6 +26,7 @@ interface Providers {
   proposals: ProposalsProvider
   photos: PhotosProvider
   backup: BackupProvider
+  catalogImport: CatalogImportProvider
 }
 
 const mockProviders: Providers = {
@@ -34,6 +37,7 @@ const mockProviders: Providers = {
   proposals: mockProposalsProvider,
   photos: mockPhotosProvider,
   backup: mockBackupProvider,
+  catalogImport: mockCatalogImportProvider,
 }
 
 /**

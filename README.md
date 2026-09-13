@@ -67,6 +67,7 @@ src/
   lib/
     money.ts      форматирование рублей, парсинг цен
     calc.ts       скидки, итоги, доступные услуги, snapshot
+    catalog-import.ts  разбор CSV для импорта автомобилей и прайсов
     validation/   zod-схемы входных форм и бэкапа
     mock/         localStorage-БД, seed, хэш паролей (WebCrypto)
     proposal-view.ts, proposal-meta.ts   представление КП

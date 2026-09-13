@@ -39,6 +39,8 @@ interface PricesProvider   { list(): Promise<Price[]>; upsert(carId, serviceId, 
 interface ProposalsProvider{ list(): Promise<Proposal[]>; get(id): Promise<Proposal|null>; create(data): Promise<Proposal>; update(id, data): Promise<Proposal>; remove(id): Promise<void>; nextNumber(year): Promise<string> }
 interface PhotosProvider   { upload(file): Promise<string>; remove(ref): Promise<void> }   // ref = картинка-строка (mock: dataURL; prod: storage url)
 interface AuthProvider     { getSession(): Promise<Session|null>; login(email,pw): Promise<Session>; logout(): Promise<void>; }
+interface BackupProvider   { exportCatalog(): Promise<BackupV1>; importCatalog(data): Promise<void> }
+interface CatalogImportProvider { importCars(rows): Promise<ImportReport>; importPrices(rows): Promise<ImportReport> }  // CSV из «Настроек»
 ```
 
 ## 4. Routed-карта
@@ -87,6 +89,13 @@ interface AuthProvider     { getSession(): Promise<Session|null>; login(email,pw
 - `null` цена = «—» (пустое поле).
 - Правка цены: debounce ~400 мс + optimistic update + `upsert`.
 - Sticky: первый столбец и header; горизонтальный scroll; на мобильных остаётся usable (не сжимаем).
+
+### 7.1 Импорт из CSV (Настройки)
+
+- Две карточки: **Автомобили** (`Марка;Модель`) и **Прайсы** (`Автомобиль;Услуга;Цена`, длинный формат).
+- Разбор — собственный парсер `lib/catalog-import.ts` (без зависимостей): автодетект разделителя `;`, `,`, таб; BOM; CRLF; quoted-поля; UTF-8.
+- Импорт дополняющий: автомобиль/услуга ключуются (марка+модель / имя, регистронезависимо), создаются при отсутствии; цены — upsert. Ничего не удаляется.
+- Строки с ошибками не применяются и показываются в отчёте («строка N: причина»); невалидный файл не меняет БД.
 
 ## 8. Данные и фото (mock-слой)
 

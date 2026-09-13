@@ -76,3 +76,20 @@ export interface BackupProvider {
   exportCatalog(): Promise<BackupV1>
   importCatalog(data: BackupV1): Promise<void>
 }
+
+/** Итоги импорта справочника (CSV). errors — только для строк, отброшенных при применении, вида «строка N: причина». */
+export interface ImportReport {
+  carsCreated: number
+  carsMatched: number
+  servicesCreated: number
+  pricesApplied: number
+  invalid: number
+  errors: string[]
+}
+
+export interface CatalogImportProvider {
+  /** Добавить автомобили (ключ = марка+модель); существующие не меняются. */
+  importCars(rows: { brand: string; model: string }[]): Promise<ImportReport>
+  /** Импортировать прайсы: автомобиль и услуга создаются при отсутствии, цены обновляются. */
+  importPrices(rows: { carKey: string; serviceKey: string; price: number }[]): Promise<ImportReport>
+}
