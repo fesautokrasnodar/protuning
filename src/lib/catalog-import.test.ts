@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { normalizeKey, parseCarsCsv, parsePricesCsv } from '@/lib/catalog-import'
+import {
+  buildCarsCsv,
+  buildPricesCsv,
+  normalizeKey,
+  parseCarsCsv,
+  parsePricesCsv,
+} from '@/lib/catalog-import'
 
 describe('normalizeKey', () => {
   it('схлопывает пробелы и приводит к нижнему регистру', () => {
@@ -96,5 +102,37 @@ describe('parsePricesCsv', () => {
     expect(rows).toHaveLength(1)
     expect(errors).toHaveLength(1)
     expect(errors[0]).toMatch(/не указана услуга/)
+  })
+})
+
+describe('buildCarsCsv', () => {
+  it('строит BOM + заголовок и кругло-сходится с парсером', () => {
+    const rows = [
+      { brand: 'VOYAH', model: 'Dream' },
+      { brand: 'TANK', model: '500' },
+    ]
+    const csv = buildCarsCsv(rows)
+    expect(csv.startsWith('\uFEFFМарка;Модель\r\n')).toBe(true)
+    const parsed = parseCarsCsv(csv)
+    expect(parsed.errors).toEqual([])
+    expect(parsed.rows).toEqual(rows)
+  })
+
+  it('экранирует кавычки в значениях', () => {
+    const csv = buildCarsCsv([{ brand: 'BMW "X"', model: 'M' }])
+    expect(csv).toContain('"BMW ""X"""')
+    expect(parseCarsCsv(csv).rows).toEqual([{ brand: 'BMW "X"', model: 'M' }])
+  })
+})
+
+describe('buildPricesCsv', () => {
+  it('строит заголовок с ценой с тысячами и кругло-сходится с парсером', () => {
+    const rows = [{ carKey: 'VOYAH Dream', serviceKey: 'Замена света', price: 45000 }]
+    const csv = buildPricesCsv(rows)
+    expect(csv.startsWith('\uFEFFАвтомобиль;Услуга;Цена\r\n')).toBe(true)
+    expect(csv).toContain('45 000')
+    const parsed = parsePricesCsv(csv)
+    expect(parsed.errors).toEqual([])
+    expect(parsed.rows).toEqual(rows)
   })
 })

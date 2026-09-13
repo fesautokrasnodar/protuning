@@ -182,3 +182,37 @@ export function parsePricesCsv(text: string): ParsedImport<PriceImportRow> {
   }
   return { rows, errors }
 }
+
+/* ---------- Построение CSV (файлы-примеры) ---------- */
+
+/** Экранировать поле: кавычки/разделители/переносы оборачиваются в `"…"`, `"` дублируется. */
+function escapeCell(value: string, delimiter: string): string {
+  if (value.includes('"') || value.includes('\n') || value.includes('\r') || value.includes(delimiter)) {
+    return `"${value.replace(/"/g, '""')}"`
+  }
+  return value
+}
+
+function toCsv(headers: string[], rows: string[][], delimiter: string): string {
+  const lines = [headers.map((h) => escapeCell(h, delimiter)).join(delimiter)]
+  for (const row of rows) lines.push(row.map((cell) => escapeCell(cell, delimiter)).join(delimiter))
+  return `\uFEFF${lines.join('\r\n')}`
+}
+
+/** Построить пример файла автомобилей: BOM + заголовок `Марка;Модель`. */
+export function buildCarsCsv(rows: CarImportRow[]): string {
+  return toCsv(
+    ['Марка', 'Модель'],
+    rows.map((r) => [r.brand, r.model]),
+    ';',
+  )
+}
+
+/** Построить пример файла прайсов: BOM + заголовок `Автомобиль;Услуга;Цена`. */
+export function buildPricesCsv(rows: PriceImportRow[]): string {
+  return toCsv(
+    ['Автомобиль', 'Услуга', 'Цена'],
+    rows.map((r) => [r.carKey, r.serviceKey, String(r.price).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')]),
+    ';',
+  )
+}
