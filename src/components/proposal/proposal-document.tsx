@@ -33,8 +33,6 @@ const BENEFITS = [
 export function ProposalDocument({ data }: { data: ProposalViewData }) {
   return (
     <article className="proposal-doc relative mx-auto w-[794px] min-h-[1123px] overflow-hidden bg-white shadow-[0_12px_30px_rgba(0,0,0,0.11)] print:shadow-none">
-      <div className="pointer-events-none absolute -top-40 -right-24 z-0 h-[360px] w-[380px] rotate-[28deg] bg-red" />
-
       <header className="relative z-10 flex min-h-[135px] items-start justify-between bg-charcoal px-[38px] py-8 text-white">
         <div className="flex items-center gap-3">
           <img src="logo.webp" alt="PRO-TUNING" className="h-[52px] max-w-[245px] object-contain" />
@@ -54,8 +52,7 @@ export function ProposalDocument({ data }: { data: ProposalViewData }) {
             Индивидуальный комплект дооснащения и тюнинга с установкой профессиональной командой.
           </p>
         </div>
-        <div className="relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#f7f7f8] to-[#dedee2]">
-          <div className="pointer-events-none absolute -bottom-[90px] -left-[35px] h-[260px] w-[150px] rotate-[30deg] bg-red" />
+        <div className="relative flex items-center justify-center bg-gradient-to-br from-[#f7f7f8] to-[#dedee2]">
           {data.carPhotoUrl ? (
             <img src={data.carPhotoUrl} alt={data.carLabel} className="relative z-[2] h-full w-full object-contain p-[18px]" />
           ) : (
@@ -115,9 +112,7 @@ export function ProposalDocument({ data }: { data: ProposalViewData }) {
           </div>
         )}
 
-        <div className="relative mt-4 flex items-center justify-between overflow-hidden bg-charcoal py-4 pl-9 pr-9 text-white print-clean">
-          <span className="pointer-events-none absolute top-1/2 left-2 h-12 w-1.5 -translate-y-1/2 rotate-[24deg] bg-red" />
-          <span className="pointer-events-none absolute top-1/2 right-2 h-12 w-1.5 -translate-y-1/2 rotate-[24deg] bg-red" />
+        <div className="mt-4 flex items-center justify-between bg-charcoal py-4 pl-9 pr-9 text-white print-clean">
           <span className="text-[16px] font-black">ИТОГО</span>
           <strong className="text-[27px] font-black">{formatRub(data.total)}</strong>
         </div>
