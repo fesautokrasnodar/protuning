@@ -183,6 +183,16 @@
     box-shadow: none !important;
   }
 
+  /* Масштаб превью не должен влиять на печать. */
+  .a4-frame-wrap {
+    height: auto !important;
+    position: static !important;
+  }
+  .a4-frame-inner {
+    width: 794px !important;
+    transform: none !important;
+  }
+
   /* Отдельная страница печати (ProposalPrintPage). */
   .print-root,
   .print-root .proposal-doc {

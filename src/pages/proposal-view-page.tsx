@@ -10,6 +10,7 @@ import { ErrorState } from '@/components/common/error-state'
 import { ConfirmDialog } from '@/components/common/confirm-dialog'
 import { Spinner } from '@/components/common/spinner'
 import { ProposalDocument } from '@/components/proposal/proposal-document'
+import { A4PreviewFrame } from '@/components/proposal/a4-preview-frame'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -128,10 +129,10 @@ export function ProposalViewPage() {
         }
       />
 
-      <div className="scrollbar-thin overflow-x-auto rounded-2xl border border-line bg-[#ececef] p-3">
-        <div className="w-[794px]">
+      <div className="rounded-2xl border border-line bg-[#ececef] p-3">
+        <A4PreviewFrame>
           <ProposalDocument data={view} />
-        </div>
+        </A4PreviewFrame>
       </div>
 
       <ConfirmDialog

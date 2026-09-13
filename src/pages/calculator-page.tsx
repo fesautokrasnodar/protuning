@@ -11,6 +11,7 @@ import { CarPicker } from '@/components/calculator/car-picker'
 import { ServicePicker, type ServiceChoice } from '@/components/calculator/service-picker'
 import { TotalBar } from '@/components/calculator/total-bar'
 import { ProposalDocument, type ProposalViewData } from '@/components/proposal/proposal-document'
+import { A4PreviewFrame } from '@/components/proposal/a4-preview-frame'
 import { PageHeader } from '@/components/common/page-header'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/common/error-state'
@@ -352,10 +353,10 @@ export function CalculatorPage() {
               <Link to="/proposals">Перейти к КП →</Link>
             </Button>
           </div>
-          <div className="scrollbar-thin overflow-x-auto rounded-2xl border border-line bg-[#ececef] p-3">
-            <div className="w-[794px]">
+          <div className="rounded-2xl border border-line bg-[#ececef] p-3">
+            <A4PreviewFrame>
               <ProposalDocument data={view} />
-            </div>
+            </A4PreviewFrame>
           </div>
         </div>
       </div>
