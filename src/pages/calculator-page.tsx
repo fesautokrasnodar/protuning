@@ -19,9 +19,10 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
-import { availableServicesForCar, computeTotals, priceForCar } from '@/lib/calc'
-import { parsePrice, formatRub } from '@/lib/money'
+import { availableServicesForCar, computeTotals, discountFromPercent, parsePercent, priceForCar } from '@/lib/calc'
 import { formatPhoneMask } from '@/lib/phone'
+import { parsePrice, formatRub, sumPrices } from '@/lib/money'
+import { cn } from '@/lib/utils'
 import { proposalInputSchema } from '@/lib/validation/schemas'
 
 export function CalculatorPage() {
@@ -39,6 +40,7 @@ export function CalculatorPage() {
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<'clientName' | 'clientPhone' | 'clientEmail', string>>>({})
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [discountInput, setDiscountInput] = useState('')
+  const [discountMode, setDiscountMode] = useState<'rub' | 'pct'>('rub')
   const [saving, setSaving] = useState(false)
 
   const cars = carsQuery.data ?? []
@@ -57,7 +59,17 @@ export function CalculatorPage() {
   }, [carId, servicesQuery.data, pricesQuery.data])
 
   const validSelected = options.filter((o) => selectedIds.includes(o.id))
-  const discount = parsePrice(discountInput) ?? 0
+  const subtotal = useMemo(() => sumPrices(validSelected.map((o) => o.price)), [validSelected])
+  const discountPercent = parsePercent(discountInput) ?? 0
+  const rawPercent = Number(discountInput.trim().replace(/[\s%]/g, '').replace(',', '.'))
+  const percentOutOfRange = Number.isFinite(rawPercent) && (rawPercent > 100 || rawPercent < 0)
+  const discount = useMemo(
+    () =>
+      discountMode === 'pct'
+        ? discountFromPercent(subtotal, discountPercent)
+        : (parsePrice(discountInput) ?? 0),
+    [discountMode, subtotal, discountPercent, discountInput],
+  )
   const totals = useMemo(
     () => computeTotals(validSelected.map((o) => o.price), discount),
     [validSelected, discount],
@@ -247,19 +259,47 @@ export function CalculatorPage() {
             </div>
 
             <div className="mt-4">
-              <Label htmlFor="discount">Скидка, ₽</Label>
+              <div className="mb-1.5 flex items-center justify-between gap-2">
+                <Label htmlFor="discount">Скидка {discountMode === 'pct' ? ', %' : ', ₽'}</Label>
+                <div className="flex rounded-md border border-line bg-card p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setDiscountMode('rub')}
+                    className={cn(
+                      'rounded px-2.5 py-0.5 text-xs font-bold transition-colors',
+                      discountMode === 'rub' ? 'bg-charcoal text-white' : 'text-muted-foreground hover:text-ink',
+                    )}
+                  >
+                    ₽
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDiscountMode('pct')}
+                    className={cn(
+                      'rounded px-2.5 py-0.5 text-xs font-bold transition-colors',
+                      discountMode === 'pct' ? 'bg-charcoal text-white' : 'text-muted-foreground hover:text-ink',
+                    )}
+                  >
+                    %
+                  </button>
+                </div>
+              </div>
               <Input
                 id="discount"
                 type="number"
                 min={0}
-                step={500}
-                inputMode="numeric"
+                max={discountMode === 'pct' ? 100 : undefined}
+                step={discountMode === 'pct' ? 0.5 : 500}
+                inputMode={discountMode === 'pct' ? 'decimal' : 'numeric'}
                 placeholder="0"
                 value={discountInput}
                 onChange={(e) => setDiscountInput(e.target.value)}
                 className="mt-1.5"
               />
-              {discount > totals.subtotal ? (
+              {discountMode === 'pct' && percentOutOfRange ? (
+                <p className="mt-1 text-xs font-semibold text-red">Скидка ограничена диапазоном 0–100%</p>
+              ) : null}
+              {discountMode === 'rub' && discount > subtotal ? (
                 <p className="mt-1 text-xs font-semibold text-red">Скидка больше стоимости услуг</p>
               ) : null}
             </div>
@@ -277,7 +317,12 @@ export function CalculatorPage() {
             />
           </Card>
 
-          <TotalBar subtotal={totals.subtotal} discount={totals.discount} total={totals.total} />
+          <TotalBar
+            subtotal={totals.subtotal}
+            discount={totals.discount}
+            total={totals.total}
+            discountPercent={discountMode === 'pct' && totals.discount > 0 ? discountPercent : null}
+          />
 
           <div className="grid grid-cols-2 gap-2">
             <Button variant="dark" onClick={() => window.print()} disabled={saving}>

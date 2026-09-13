@@ -22,6 +22,26 @@ export function clampDiscount(discount: number, subtotal: number): number {
   return clamped
 }
 
+/**
+ * Разобрать скидку в процентах: 0..100, допускаются десятичные и знак `%`.
+ * Пустая строка / не-число -> null; отрицательные -> 0; больше 100 -> 100 (прижим).
+ */
+export function parsePercent(input: string): number | null {
+  const trimmed = input.trim().replace(/[\s%]/g, '').replace(',', '.')
+  if (trimmed === '') return null
+  const n = Number(trimmed)
+  if (!Number.isFinite(n)) return null
+  if (n < 0) return 0
+  if (n > 100) return 100
+  return n
+}
+
+/** Рублёвая скидка из процентов: round(subtotal * percent / 100). 0 при проценте <= 0. */
+export function discountFromPercent(subtotal: number, percent: number): number {
+  if (!Number.isFinite(percent) || percent <= 0 || !Number.isFinite(subtotal)) return 0
+  return Math.round((Math.max(0, subtotal) * percent) / 100)
+}
+
 /** Итоговые суммы: total = subtotal - discount (без округлений). */
 export function computeTotals(itemPrices: number[], discount: number): Totals {
   const subtotal = sumPrices(itemPrices)

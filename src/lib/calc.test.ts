@@ -4,6 +4,8 @@ import {
   buildSnapshotItems,
   clampDiscount,
   computeTotals,
+  discountFromPercent,
+  parsePercent,
   priceForCar,
   carLabel,
 } from '@/lib/calc'
@@ -44,6 +46,38 @@ describe('computeTotals', () => {
 
   it('скидка не может превысить subtotal', () => {
     expect(computeTotals([10000], 99999)).toEqual({ subtotal: 10000, discount: 10000, total: 0 })
+  })
+})
+
+describe('parsePercent', () => {
+  it('разбирает целые и десятичные проценты', () => {
+    expect(parsePercent('10')).toBe(10)
+    expect(parsePercent(' 12,5 ')).toBe(12.5)
+    expect(parsePercent('5.5%')).toBe(5.5)
+    expect(parsePercent('%')).toBe(null)
+  })
+
+  it('прижимает к диапазону 0..100', () => {
+    expect(parsePercent('150')).toBe(100)
+    expect(parsePercent('-3')).toBe(0)
+  })
+
+  it('пустая строка и не-число -> null', () => {
+    expect(parsePercent('')).toBe(null)
+    expect(parsePercent('abc')).toBe(null)
+  })
+})
+
+describe('discountFromPercent', () => {
+  it('рублевая скидка = round(subtotal * percent / 100)', () => {
+    expect(discountFromPercent(35000, 10)).toBe(3500)
+    expect(discountFromPercent(35000, 7)).toBe(2450)
+    expect(discountFromPercent(33333, 10)).toBe(3333)
+  })
+
+  it('процент <= 0 -> 0', () => {
+    expect(discountFromPercent(35000, 0)).toBe(0)
+    expect(discountFromPercent(35000, -5)).toBe(0)
   })
 })
 
