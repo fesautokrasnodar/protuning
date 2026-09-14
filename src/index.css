@@ -183,7 +183,7 @@
     box-shadow: none !important;
   }
   /* Обвязка, не содержащая документ, убирается из потока целиком — без лишних пустых страниц. */
-  .print-mode *:not(:has(.proposal-doc)) {
+  .print-mode *:not(.proposal-doc):not(.proposal-doc *):not(:has(.proposal-doc)) {
     display: none !important;
   }
 
